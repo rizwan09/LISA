@@ -20,7 +20,7 @@ hparams = {
   'beta2': 0.98,
   'epsilon': 1e-12,
   'use_nesterov': True,
-  'batch_size': 256,
+  'batch_size': 32,
   'shuffle_buffer_multiplier': 100,
   'eval_throttle_secs': 1000,
   'eval_every_steps': 1000,
@@ -35,7 +35,7 @@ hparams = {
   'attn_dropout': 1.0,
   'ff_dropout': 1.0,
   'prepost_dropout': 1.0,
-  'random_seed': int(time.time())
+  'random_seed': 9787#int(time.time())
 }
 
 
