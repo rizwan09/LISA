@@ -1,17 +1,7 @@
-# LISA: Linguistically-Informed Self-Attention
+# SCBR
 
-![](./lisa.jpg)
-
-This is a work-in-progress, but much-improved, re-implementation of the 
-linguistically-informed self-attention (LISA) model described in the following paper:
-> Emma Strubell, Patrick Verga, Daniel Andor, David Weiss, and Andrew McCallum. [Linguistically-Informed 
-> Self-Attention for Semantic Role Labeling](https://arxiv.org/abs/1804.08199). 
-> *Conference on Empirical Methods in Natural Language Processing (EMNLP)*. 
-> Brussels, Belgium. October 2018. 
-
-**To exactly replicate the results in the paper at the cost of an unpleasantly hacky codebase, you
-can use the [original LISA code here](https://github.com/strubell/LISA-v1).**
-
+This is a work-in-progress, implementation of the 
+Baseline codes are from the forked from LISA.
 Requirements:
 ----
 - \>= Python 3.6
