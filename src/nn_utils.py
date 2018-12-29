@@ -257,6 +257,7 @@ def bilinear_classifier_nary(inputs1, inputs2, n_classes, keep_prob, add_bias1=T
                    add_bias1=add_bias1,
                    add_bias2=add_bias2,
                    initializer=tf.zeros_initializer())
+  # bilin = MLP(inputs2, n_classes)
 
   return bilin
 

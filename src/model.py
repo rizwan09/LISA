@@ -9,6 +9,7 @@ import output_fns
 import transformer
 import nn_utils
 import train_utils
+import pdb
 from lazy_adam_v2 import LazyAdamOptimizer
 
 
@@ -93,6 +94,8 @@ class LISAModel:
     hparams = self.hparams(mode)
 
     with tf.variable_scope("LISA", reuse=tf.AUTO_REUSE):
+
+      # pdb.set_trace()
 
       batch_shape = tf.shape(features)
       batch_size = batch_shape[0]

@@ -189,6 +189,7 @@ def srl_bilinear(mode, hparams, model_config, inputs, targets, num_labels, token
       role_mlp_size = model_config['role_mlp_size']
 
       predicate_preds = predicate_preds_train if mode == tf.estimator.ModeKeys.TRAIN else predicate_preds_eval
+      predicate_preds = predicate_preds_eval
 
       # (1) project into predicate, role representations
       with tf.variable_scope('MLP'):
