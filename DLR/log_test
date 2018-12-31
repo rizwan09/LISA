@@ -1,0 +1,237 @@
+module () {  eval `/sw/ubuntu/Modules/$MODULE_VERSION/bin/modulecmd bash $*`
+}
+#!/usr/bin/env bash
+
+#
+function run_lang () {
+
+echo "======================"
+echo "Running with lang = $1_$2_$3"
+
+cur_lang=$1
+which_set=$2
+which_model=$3
+
+# try them both, will fail on one
+
+if [ "$which_model" == "biaffine" ]; then
+
+echo PYTHONPATH=../src/ CUDA_VISIBLE_DEVICES=$RGPU python2 ../src/examples/analyze.py --parser biaffine --ordered --gpu \
+--punctuation 'PUNCT' 'SYM' --out_filename analyzer.$cur_lang.$which_set.out --model_name 'network.pt' \
+--test "../data2.2_more/${cur_lang}_${which_set}.conllu" --model_path "./model/" --extra_embed "../data2.2_more/wiki.multi.${cur_lang}.vec"
+
+PYTHONPATH=../src/ CUDA_VISIBLE_DEVICES=$RGPU python2 ../src/examples/analyze.py --parser biaffine --ordered --gpu \
+--punctuation 'PUNCT' 'SYM' --out_filename analyzer.$cur_lang.$which_set.out --model_name 'network.pt' \
+--test "../data2.2_more/${cur_lang}_${which_set}.conllu" --model_path "./model/" --extra_embed "../data2.2_more/wiki.multi.${cur_lang}.vec"
+
+elif [ "$which_model" == "stackptr" ]; then
+
+echo PYTHONPATH=../src/ CUDA_VISIBLE_DEVICES=$RGPU python2 ../src/examples/analyze.py --parser stackptr --beam 5 --ordered --gpu \
+--punctuation 'PUNCT' 'SYM' --out_filename analyzer.$cur_lang.$which_set.out --model_name 'network.pt' \
+--test "../data2.2_more/${cur_lang}_${which_set}.conllu" --model_path "./model/" --extra_embed "../data2.2_more/wiki.multi.${cur_lang}.vec"
+
+PYTHONPATH=../src/ CUDA_VISIBLE_DEVICES=$RGPU python2 ../src/examples/analyze.py --parser stackptr --beam 5 --ordered --gpu \
+--punctuation 'PUNCT' 'SYM' --out_filename analyzer.$cur_lang.$which_set.out --model_name 'network.pt' \
+--test "../data2.2_more/${cur_lang}_${which_set}.conllu" --model_path "./model/" --extra_embed "../data2.2_more/wiki.multi.${cur_lang}.vec"
+
+fi
+
+}
+
+# =====
+
+echo "Run them all with $1_$2"
+Run them all with test_stackptr
+
+# running with which dev, which set?
+for cur_lang in ar bg ca zh hr cs da nl en et "fi" fr de he hi id it ja ko la lv no pl pt ro ru sk sl es sv uk;
+do
+    run_lang $cur_lang $1 $2;
+done
+======================
+Running with lang = ar_test_stackptr
+PYTHONPATH=../src/ CUDA_VISIBLE_DEVICES=0 python2 ../src/examples/analyze.py --parser stackptr --beam 5 --ordered --gpu --punctuation PUNCT SYM --out_filename analyzer.ar.test.out --model_name network.pt --test ../data2.2_more/ar_test.conllu --model_path ./model/ --extra_embed ../data2.2_more/wiki.multi.ar.vec
+2018-11-12 16:25:36,912 - Analyzer - INFO - punctuations(2): PUNCT SYM
+2018-11-12 16:25:36,981 - Create Alphabets - INFO - Word Alphabet Size (Singleton): 36021 (13535)
+2018-11-12 16:25:36,981 - Create Alphabets - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:36,981 - Create Alphabets - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:36,981 - Create Alphabets - INFO - Type Alphabet Size: 45
+2018-11-12 16:25:36,981 - Create Alphabets - INFO - Maximum Sentence Length: 0
+2018-11-12 16:25:36,981 - Analyzer - INFO - Word Alphabet Size: 36021
+2018-11-12 16:25:36,981 - Analyzer - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:36,981 - Analyzer - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:36,981 - Analyzer - INFO - Type Alphabet Size: 45
+Traceback (most recent call last):
+  File "../src/examples/analyze.py", line 599, in <module>
+    main()
+  File "../src/examples/analyze.py", line 70, in main
+    stackptr(model_path, model_name, test_path, punct_set, use_gpu, logger, args)
+  File "../src/examples/analyze.py", line 298, in stackptr
+    args, kwargs = load_model_arguments_from_json()
+  File "../src/examples/analyze.py", line 294, in load_model_arguments_from_json
+    arguments = json.load(open(arg_path, 'r'))
+IOError: [Errno 2] No such file or directory: './model/network.pt.arg.json'
+======================
+Running with lang = bg_test_stackptr
+PYTHONPATH=../src/ CUDA_VISIBLE_DEVICES=0 python2 ../src/examples/analyze.py --parser stackptr --beam 5 --ordered --gpu --punctuation PUNCT SYM --out_filename analyzer.bg.test.out --model_name network.pt --test ../data2.2_more/bg_test.conllu --model_path ./model/ --extra_embed ../data2.2_more/wiki.multi.bg.vec
+2018-11-12 16:25:38,200 - Analyzer - INFO - punctuations(2): PUNCT SYM
+2018-11-12 16:25:38,302 - Create Alphabets - INFO - Word Alphabet Size (Singleton): 36021 (13535)
+2018-11-12 16:25:38,302 - Create Alphabets - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:38,302 - Create Alphabets - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:38,302 - Create Alphabets - INFO - Type Alphabet Size: 45
+2018-11-12 16:25:38,303 - Create Alphabets - INFO - Maximum Sentence Length: 0
+2018-11-12 16:25:38,303 - Analyzer - INFO - Word Alphabet Size: 36021
+2018-11-12 16:25:38,303 - Analyzer - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:38,303 - Analyzer - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:38,303 - Analyzer - INFO - Type Alphabet Size: 45
+Traceback (most recent call last):
+  File "../src/examples/analyze.py", line 599, in <module>
+    main()
+  File "../src/examples/analyze.py", line 70, in main
+    stackptr(model_path, model_name, test_path, punct_set, use_gpu, logger, args)
+  File "../src/examples/analyze.py", line 298, in stackptr
+    args, kwargs = load_model_arguments_from_json()
+  File "../src/examples/analyze.py", line 294, in load_model_arguments_from_json
+    arguments = json.load(open(arg_path, 'r'))
+IOError: [Errno 2] No such file or directory: './model/network.pt.arg.json'
+======================
+Running with lang = ca_test_stackptr
+PYTHONPATH=../src/ CUDA_VISIBLE_DEVICES=0 python2 ../src/examples/analyze.py --parser stackptr --beam 5 --ordered --gpu --punctuation PUNCT SYM --out_filename analyzer.ca.test.out --model_name network.pt --test ../data2.2_more/ca_test.conllu --model_path ./model/ --extra_embed ../data2.2_more/wiki.multi.ca.vec
+2018-11-12 16:25:39,391 - Analyzer - INFO - punctuations(2): PUNCT SYM
+2018-11-12 16:25:39,457 - Create Alphabets - INFO - Word Alphabet Size (Singleton): 36021 (13535)
+2018-11-12 16:25:39,457 - Create Alphabets - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:39,457 - Create Alphabets - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:39,457 - Create Alphabets - INFO - Type Alphabet Size: 45
+2018-11-12 16:25:39,457 - Create Alphabets - INFO - Maximum Sentence Length: 0
+2018-11-12 16:25:39,457 - Analyzer - INFO - Word Alphabet Size: 36021
+2018-11-12 16:25:39,457 - Analyzer - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:39,457 - Analyzer - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:39,457 - Analyzer - INFO - Type Alphabet Size: 45
+Traceback (most recent call last):
+  File "../src/examples/analyze.py", line 599, in <module>
+    main()
+  File "../src/examples/analyze.py", line 70, in main
+    stackptr(model_path, model_name, test_path, punct_set, use_gpu, logger, args)
+  File "../src/examples/analyze.py", line 298, in stackptr
+    args, kwargs = load_model_arguments_from_json()
+  File "../src/examples/analyze.py", line 294, in load_model_arguments_from_json
+    arguments = json.load(open(arg_path, 'r'))
+IOError: [Errno 2] No such file or directory: './model/network.pt.arg.json'
+======================
+Running with lang = zh_test_stackptr
+PYTHONPATH=../src/ CUDA_VISIBLE_DEVICES=0 python2 ../src/examples/analyze.py --parser stackptr --beam 5 --ordered --gpu --punctuation PUNCT SYM --out_filename analyzer.zh.test.out --model_name network.pt --test ../data2.2_more/zh_test.conllu --model_path ./model/ --extra_embed ../data2.2_more/wiki.multi.zh.vec
+2018-11-12 16:25:40,454 - Analyzer - INFO - punctuations(2): PUNCT SYM
+2018-11-12 16:25:40,536 - Create Alphabets - INFO - Word Alphabet Size (Singleton): 36021 (13535)
+2018-11-12 16:25:40,536 - Create Alphabets - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:40,536 - Create Alphabets - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:40,536 - Create Alphabets - INFO - Type Alphabet Size: 45
+2018-11-12 16:25:40,536 - Create Alphabets - INFO - Maximum Sentence Length: 0
+2018-11-12 16:25:40,536 - Analyzer - INFO - Word Alphabet Size: 36021
+2018-11-12 16:25:40,536 - Analyzer - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:40,536 - Analyzer - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:40,536 - Analyzer - INFO - Type Alphabet Size: 45
+Traceback (most recent call last):
+  File "../src/examples/analyze.py", line 599, in <module>
+    main()
+  File "../src/examples/analyze.py", line 70, in main
+    stackptr(model_path, model_name, test_path, punct_set, use_gpu, logger, args)
+  File "../src/examples/analyze.py", line 298, in stackptr
+    args, kwargs = load_model_arguments_from_json()
+  File "../src/examples/analyze.py", line 294, in load_model_arguments_from_json
+    arguments = json.load(open(arg_path, 'r'))
+IOError: [Errno 2] No such file or directory: './model/network.pt.arg.json'
+======================
+Running with lang = hr_test_stackptr
+PYTHONPATH=../src/ CUDA_VISIBLE_DEVICES=0 python2 ../src/examples/analyze.py --parser stackptr --beam 5 --ordered --gpu --punctuation PUNCT SYM --out_filename analyzer.hr.test.out --model_name network.pt --test ../data2.2_more/hr_test.conllu --model_path ./model/ --extra_embed ../data2.2_more/wiki.multi.hr.vec
+2018-11-12 16:25:41,544 - Analyzer - INFO - punctuations(2): PUNCT SYM
+2018-11-12 16:25:41,618 - Create Alphabets - INFO - Word Alphabet Size (Singleton): 36021 (13535)
+2018-11-12 16:25:41,618 - Create Alphabets - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:41,618 - Create Alphabets - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:41,619 - Create Alphabets - INFO - Type Alphabet Size: 45
+2018-11-12 16:25:41,619 - Create Alphabets - INFO - Maximum Sentence Length: 0
+2018-11-12 16:25:41,619 - Analyzer - INFO - Word Alphabet Size: 36021
+2018-11-12 16:25:41,619 - Analyzer - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:41,619 - Analyzer - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:41,619 - Analyzer - INFO - Type Alphabet Size: 45
+Traceback (most recent call last):
+  File "../src/examples/analyze.py", line 599, in <module>
+    main()
+  File "../src/examples/analyze.py", line 70, in main
+    stackptr(model_path, model_name, test_path, punct_set, use_gpu, logger, args)
+  File "../src/examples/analyze.py", line 298, in stackptr
+    args, kwargs = load_model_arguments_from_json()
+  File "../src/examples/analyze.py", line 294, in load_model_arguments_from_json
+    arguments = json.load(open(arg_path, 'r'))
+IOError: [Errno 2] No such file or directory: './model/network.pt.arg.json'
+======================
+Running with lang = cs_test_stackptr
+PYTHONPATH=../src/ CUDA_VISIBLE_DEVICES=0 python2 ../src/examples/analyze.py --parser stackptr --beam 5 --ordered --gpu --punctuation PUNCT SYM --out_filename analyzer.cs.test.out --model_name network.pt --test ../data2.2_more/cs_test.conllu --model_path ./model/ --extra_embed ../data2.2_more/wiki.multi.cs.vec
+2018-11-12 16:25:42,878 - Analyzer - INFO - punctuations(2): PUNCT SYM
+2018-11-12 16:25:42,986 - Create Alphabets - INFO - Word Alphabet Size (Singleton): 36021 (13535)
+2018-11-12 16:25:42,986 - Create Alphabets - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:42,986 - Create Alphabets - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:42,986 - Create Alphabets - INFO - Type Alphabet Size: 45
+2018-11-12 16:25:42,986 - Create Alphabets - INFO - Maximum Sentence Length: 0
+2018-11-12 16:25:42,986 - Analyzer - INFO - Word Alphabet Size: 36021
+2018-11-12 16:25:42,986 - Analyzer - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:42,986 - Analyzer - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:42,986 - Analyzer - INFO - Type Alphabet Size: 45
+Traceback (most recent call last):
+  File "../src/examples/analyze.py", line 599, in <module>
+    main()
+  File "../src/examples/analyze.py", line 70, in main
+    stackptr(model_path, model_name, test_path, punct_set, use_gpu, logger, args)
+  File "../src/examples/analyze.py", line 298, in stackptr
+    args, kwargs = load_model_arguments_from_json()
+  File "../src/examples/analyze.py", line 294, in load_model_arguments_from_json
+    arguments = json.load(open(arg_path, 'r'))
+IOError: [Errno 2] No such file or directory: './model/network.pt.arg.json'
+======================
+Running with lang = da_test_stackptr
+PYTHONPATH=../src/ CUDA_VISIBLE_DEVICES=0 python2 ../src/examples/analyze.py --parser stackptr --beam 5 --ordered --gpu --punctuation PUNCT SYM --out_filename analyzer.da.test.out --model_name network.pt --test ../data2.2_more/da_test.conllu --model_path ./model/ --extra_embed ../data2.2_more/wiki.multi.da.vec
+2018-11-12 16:25:44,413 - Analyzer - INFO - punctuations(2): PUNCT SYM
+2018-11-12 16:25:44,516 - Create Alphabets - INFO - Word Alphabet Size (Singleton): 36021 (13535)
+2018-11-12 16:25:44,517 - Create Alphabets - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:44,517 - Create Alphabets - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:44,517 - Create Alphabets - INFO - Type Alphabet Size: 45
+2018-11-12 16:25:44,517 - Create Alphabets - INFO - Maximum Sentence Length: 0
+2018-11-12 16:25:44,517 - Analyzer - INFO - Word Alphabet Size: 36021
+2018-11-12 16:25:44,517 - Analyzer - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:44,517 - Analyzer - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:44,517 - Analyzer - INFO - Type Alphabet Size: 45
+Traceback (most recent call last):
+  File "../src/examples/analyze.py", line 599, in <module>
+    main()
+  File "../src/examples/analyze.py", line 70, in main
+    stackptr(model_path, model_name, test_path, punct_set, use_gpu, logger, args)
+  File "../src/examples/analyze.py", line 298, in stackptr
+    args, kwargs = load_model_arguments_from_json()
+  File "../src/examples/analyze.py", line 294, in load_model_arguments_from_json
+    arguments = json.load(open(arg_path, 'r'))
+IOError: [Errno 2] No such file or directory: './model/network.pt.arg.json'
+======================
+Running with lang = nl_test_stackptr
+PYTHONPATH=../src/ CUDA_VISIBLE_DEVICES=0 python2 ../src/examples/analyze.py --parser stackptr --beam 5 --ordered --gpu --punctuation PUNCT SYM --out_filename analyzer.nl.test.out --model_name network.pt --test ../data2.2_more/nl_test.conllu --model_path ./model/ --extra_embed ../data2.2_more/wiki.multi.nl.vec
+2018-11-12 16:25:45,597 - Analyzer - INFO - punctuations(2): PUNCT SYM
+2018-11-12 16:25:45,700 - Create Alphabets - INFO - Word Alphabet Size (Singleton): 36021 (13535)
+2018-11-12 16:25:45,701 - Create Alphabets - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:45,701 - Create Alphabets - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:45,701 - Create Alphabets - INFO - Type Alphabet Size: 45
+2018-11-12 16:25:45,701 - Create Alphabets - INFO - Maximum Sentence Length: 0
+2018-11-12 16:25:45,701 - Analyzer - INFO - Word Alphabet Size: 36021
+2018-11-12 16:25:45,701 - Analyzer - INFO - Character Alphabet Size: 87
+2018-11-12 16:25:45,701 - Analyzer - INFO - POS Alphabet Size: 15
+2018-11-12 16:25:45,701 - Analyzer - INFO - Type Alphabet Size: 45
+Traceback (most recent call last):
+  File "../src/examples/analyze.py", line 599, in <module>
+    main()
+  File "../src/examples/analyze.py", line 70, in main
+    stackptr(model_path, model_name, test_path, punct_set, use_gpu, logger, args)
+  File "../src/examples/analyze.py", line 298, in stackptr
+    args, kwargs = load_model_arguments_from_json()
+  File "../src/examples/analyze.py", line 294, in load_model_arguments_from_json
+    arguments = json.load(open(arg_path, 'r'))
+IOError: [Errno 2] No such file or directory: './model/network.pt.arg.json'
+======================
+Running with lang = en_test_stackptr
+PYTHONPATH=../src/ CUDA_VISIBLE_DEVICES=0 python2 ../src/examples/analyze.py --parser stackptr --beam 5 --ordered --gpu --punctuation PUNCT SYM --out_filename analyzer.en.test.out --model_name network.pt --test ../data2.2_more/en_test.conllu --model_path ./model/ --extra_embed ../data2.2_more/wiki.multi.en.vec

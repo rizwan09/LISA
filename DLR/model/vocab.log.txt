@@ -1,0 +1,8 @@
+2018-10-27 16:51:03,703 - VocabBuilder - INFO - 
+command-line params : ['--embed_paths', '/if5/wua4nw/zhisong/zr0920_final/data2.2_more//wiki.multi.en.vec', '--embed_lang_ids', 'en', '--data_paths', 'data2.0//en_train.conllu', 'data2.0//en_dev.conllu', '--model_path', './model/']
+
+2018-10-27 16:51:03,704 - VocabBuilder - INFO - Namespace(data_paths=['data2.0//en_train.conllu', 'data2.0//en_dev.conllu'], embed_lang_ids=['en'], embed_paths=['/if5/wua4nw/zhisong/zr0920_final/data2.2_more//wiki.multi.en.vec'], model_path='./model/')
+
+2018-10-27 16:51:03,704 - VocabBuilder - INFO - Load embeddings
+2018-10-27 16:56:41,560 - VocabBuilder - INFO - Final combined un-pruned embeddings size: 2519370.
+2018-10-27 16:56:41,560 - VocabBuilder - INFO - Creating Alphabets
