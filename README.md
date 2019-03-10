@@ -19,7 +19,11 @@ Data setup (CoNLL-2005):
     ```
 2. Get CoNLL-2005 data in the right format using [this repo](https://github.com/strubell/preprocess-conll05). 
 Follow the instructions all the way through [further preprocessing](https://github.com/strubell/preprocess-conll05#further-pre-processing-eg-for-lisa).
-3. Make sure the correct data paths are set in `config/conll05.conf`
+3. Make sure the correct data paths are set in `config/conll05-srl-only.conf`
+4. Add one column by running the ``preprocess-conll05-master/conll05st-release/add_POS_column.py`` 
+5. Fix brown.gz.parse ``)(. ?)`` into ``(. ?))``
+6. Generate (in-order) serialized gold parse tree for each sentences in dev/train/wsj/brown set by running ``preprocess-conll05-master/conll05st-release/tree_reader.py`` [5-6] are in the sam efolder as the data is.
+
 
 Train a model:
 ----
