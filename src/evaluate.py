@@ -68,6 +68,8 @@ hparams = train_utils.load_hparams(args, model_config)
 
 dev_filenames = args.dev_files.split(',')
 test_filenames = args.test_files.split(',') if args.test_files else []
+dev_parse_tree=args.dev_parse_tree.split(',')
+test_parse_tree=args.test_parse_tree.split(',') if args.test_parse_tree else []
 
 vocab = Vocab(data_config, args.save_dir)
 vocab.update(test_filenames)

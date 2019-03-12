@@ -6,13 +6,19 @@ import train_utils
 from vocab import Vocab
 from model import LISAModel
 import numpy as np
-import sys
+import sys, pdb
 
 arg_parser = argparse.ArgumentParser(description='')
 arg_parser.add_argument('--train_files', required=True,
                         help='Comma-separated list of training data files')
 arg_parser.add_argument('--dev_files', required=True,
                         help='Comma-separated list of development data files')
+arg_parser.add_argument('--train_parse_tree', required=True,
+                        help='Comma-separated list of train data files')
+arg_parser.add_argument('--dev_parse_tree', required=True,
+                        help='Comma-separated list of development data parse files')
+arg_parser.add_argument('--test_parse_tree', required=True,
+                        help='Comma-separated list of test data parse files')
 arg_parser.add_argument('--save_dir', required=True,
                         help='Directory to save models, outputs, etc.')
 # todo load this more generically, so that we can have diff stats per task
@@ -79,6 +85,8 @@ if not os.path.exists(args.save_dir):
 
 train_filenames = args.train_files.split(',')
 dev_filenames = args.dev_files.split(',')
+dev_parse_tree=args.dev_parse_tree.split(',')
+train_parse_tree=args.train_parse_tree.split(',')
 
 vocab = Vocab(data_config, args.save_dir, train_filenames)
 vocab.update(dev_filenames)
@@ -136,6 +144,8 @@ save_best_exporter = tf.estimator.BestExporter(compare_fn=partial(train_utils.be
 train_spec = tf.estimator.TrainSpec(input_fn=train_input_fn)
 eval_spec = tf.estimator.EvalSpec(input_fn=dev_input_fn, throttle_secs=hparams.eval_throttle_secs,
                                   exporters=[save_best_exporter])
+
+pdb.set_trace()
 
 # Run training
 tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
