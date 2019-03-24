@@ -3,7 +3,7 @@ import numpy as np
 import time
 import os
 from subprocess import check_output, CalledProcessError
-
+import pdb
 
 # todo simplify to convert_bio
 def convert_bilou(bio_predicted_roles):
@@ -339,4 +339,6 @@ def get_params(task_outputs, task_map, train_outputs, features, labels, task_lab
         params[param_name] = outputs_layer[param_values['output']]
       else:
         params[param_name] = param_values['value']
+
+  # pdb.set_trace()
   return params

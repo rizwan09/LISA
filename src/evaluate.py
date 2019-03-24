@@ -12,6 +12,10 @@ arg_parser.add_argument('--dev_files',
                         help='Comma-separated list of development data files')
 arg_parser.add_argument('--save_dir', required=True,
                         help='Directory containing saved model')
+rg_parser.add_argument('--dev_parse_files', required=True,
+                        help='Comma-separated list of development data parse files')
+arg_parser.add_argument('--test_parse_files', required=True,
+                        help='Comma-separated list of test data parse files')
 # todo load this more generically, so that we can have diff stats per task
 arg_parser.add_argument('--transition_stats',
                         help='Transition statistics between labels')
@@ -68,8 +72,8 @@ hparams = train_utils.load_hparams(args, model_config)
 
 dev_filenames = args.dev_files.split(',')
 test_filenames = args.test_files.split(',') if args.test_files else []
-dev_parse_tree=args.dev_parse_tree.split(',')
-test_parse_tree=args.test_parse_tree.split(',') if args.test_parse_tree else []
+dev_parse_files=args.dev_parse_files.split(',')
+test_parse_files=args.test_parse_files.split(',') if args.test_parse_files else []
 
 vocab = Vocab(data_config, args.save_dir)
 vocab.update(test_filenames)

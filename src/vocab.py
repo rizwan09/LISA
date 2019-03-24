@@ -2,14 +2,14 @@ import tensorflow as tf
 import numpy as np
 import constants
 import data_converters
-
+import pdb
 
 class Vocab:
   '''
   Handles creating and caching vocabulary files and tf vocabulary lookup ops for a given list of data files.
   '''
 
-  def __init__(self, data_config, save_dir, data_filenames=None):
+  def __init__(self, data_config, save_dir, data_filenames=None, parse_filenames=None):
     self.data_config = data_config
     self.save_dir = save_dir
 
@@ -20,7 +20,7 @@ class Vocab:
     self.vocab_lookups = None
     self.oovs = {}
 
-    self.vocab_names_sizes = self.make_vocab_files(self.data_config, self.save_dir, data_filenames)
+    self.vocab_names_sizes = self.make_vocab_files(self.data_config, self.save_dir, data_filenames, parse_filenames)
 
   '''
   Creates tf.contrib.lookup ops for all the vocabs defined in self.data_config.
@@ -45,7 +45,7 @@ class Vocab:
           vocab_lookup_ops[v] = this_lookup
 
       if embedding_files:
-        for embedding_file in embedding_files:
+        for embedding_file in list(set(embedding_files)):
           embeddings_name = embedding_file
           vocab_lookup_ops[embeddings_name] = tf.contrib.lookup.index_table_from_file(embedding_file,
                                                                                       num_oov_buckets=1,
@@ -86,7 +86,45 @@ class Vocab:
   Returns:
     Map from vocab names to their sizes
   '''
-  def create_load_or_update_vocab_files(self, data_config, save_dir, filenames=None, update_only=False):
+
+  def routine(self, filenames, vocabs, vocabs_index, data_config):
+    if filenames:
+        for filename in filenames:
+          with open(filename, 'r') as f:
+            sents = 0
+            for line in f:
+              line = line.strip()
+              if line:
+                split_line = line.split()
+                if 'serialized' in filename: 
+                  for d in vocabs_index.keys():
+                    if 'parse_tree' in d: 
+                      datum_idx = np.arange(len(split_line)).tolist()
+                      # pdb.set_trace()
+                      this_vocab_map = vocabs[vocabs_index[d]]
+                      converter_name = data_config[d]['converter']['name'] if 'converter' in data_config[d] else 'default_converter'
+                      converter_params = data_converters.get_params(data_config[d], split_line, datum_idx)
+                      this_data = data_converters.dispatch(converter_name)(**converter_params)
+                      # pdb.set_trace()
+                      for this_datum in this_data:
+                        if this_datum not in this_vocab_map:
+                          this_vocab_map[this_datum] = 0
+                        this_vocab_map[this_datum] += 1
+                else:
+                  for d in vocabs_index.keys():
+                    if 'parse_tree' not in d: 
+                      datum_idx = data_config[d]['conll_idx']
+                      this_vocab_map = vocabs[vocabs_index[d]]
+                      converter_name = data_config[d]['converter']['name'] if 'converter' in data_config[d] else 'default_converter'
+                      converter_params = data_converters.get_params(data_config[d], split_line, datum_idx)
+                      this_data = data_converters.dispatch(converter_name)(**converter_params)
+                      for this_datum in this_data:
+                        if this_datum not in this_vocab_map:
+                          this_vocab_map[this_datum] = 0
+                        this_vocab_map[this_datum] += 1
+                  sents +=1
+
+  def create_load_or_update_vocab_files(self, data_config, save_dir, filenames=None, parsenames=None, update_only=False):
 
     # init maps
     vocabs = []
@@ -101,25 +139,14 @@ class Vocab:
         vocabs_index[d] = len(vocabs_index)
 
     # Create vocabs from data files
-    if filenames:
-      for filename in filenames:
-        with open(filename, 'r') as f:
-          for line in f:
-            line = line.strip()
-            if line:
-              split_line = line.split()
-              for d in vocabs_index.keys():
-                datum_idx = data_config[d]['conll_idx']
-                this_vocab_map = vocabs[vocabs_index[d]]
-                converter_name = data_config[d]['converter']['name'] if 'converter' in data_config[d] else 'default_converter'
-                converter_params = data_converters.get_params(data_config[d], split_line, datum_idx)
-                this_data = data_converters.dispatch(converter_name)(**converter_params)
-                for this_datum in this_data:
-                  if this_datum not in this_vocab_map:
-                    this_vocab_map[this_datum] = 0
-                  this_vocab_map[this_datum] += 1
+    
+                # if sents>2000: break
+      # pdb.set_trace()
 
     # Assume we have the vocabs saved to disk; load them
+    if filenames:
+      self.routine(filenames, vocabs, vocabs_index, data_config)
+      self.routine(parsenames, vocabs, vocabs_index, data_config)
     else:
       for d in vocabs_index.keys():
         this_vocab_map = vocabs[vocabs_index[d]]
@@ -169,11 +196,11 @@ class Vocab:
 
     return {k: len(vocabs[vocabs_index[k]]) for k in vocabs_index.keys()}
 
-  def make_vocab_files(self, data_config, save_dir, filenames=None):
-    return self.create_load_or_update_vocab_files(data_config, save_dir, filenames, False)
+  def make_vocab_files(self, data_config, save_dir, filenames=None, parsenames=None):
+    return self.create_load_or_update_vocab_files(data_config, save_dir, filenames, parsenames, False)
 
-  def update(self, filenames):
-    vocab_names_sizes = self.create_load_or_update_vocab_files(self.data_config, self.save_dir, filenames, True)
+  def update(self, filenames, parsenames):
+    vocab_names_sizes = self.create_load_or_update_vocab_files(self.data_config, self.save_dir, filenames, parsenames,  True)
 
     # merge new and old
     for vocab_name, vocab_size in vocab_names_sizes.items():

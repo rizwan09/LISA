@@ -10,7 +10,7 @@ import transformer
 import nn_utils
 import train_utils
 from lazy_adam_v2 import LazyAdamOptimizer
-
+import pdb
 
 class LISAModel:
 
@@ -87,7 +87,7 @@ class LISAModel:
     pretrained_embeddings /= np.std(pretrained_embeddings)
     return pretrained_embeddings
 
-  def model_fn(self, features, mode):
+  def model_fn(self, features, labels, mode):
 
     # todo can estimators handle dropout for us or do we need to do it on our own?
     hparams = self.hparams(mode)
@@ -101,6 +101,7 @@ class LISAModel:
       sa_hidden_size = layer_config['head_dim'] * layer_config['num_heads']
 
       feats = {f: features[:, :, idx] for f, idx in self.feature_idx_map.items()}
+      # pdb.set_trace()
 
       # todo this assumes that word_type is always passed in
       words = feats['word_type']

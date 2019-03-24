@@ -8,17 +8,17 @@ from model import LISAModel
 import numpy as np
 import sys, pdb
 
+# tf.enable_eager_execution()
+
 arg_parser = argparse.ArgumentParser(description='')
 arg_parser.add_argument('--train_files', required=True,
                         help='Comma-separated list of training data files')
 arg_parser.add_argument('--dev_files', required=True,
                         help='Comma-separated list of development data files')
-arg_parser.add_argument('--train_parse_tree', required=True,
+arg_parser.add_argument('--train_parse_files', required=True,
                         help='Comma-separated list of train data files')
-arg_parser.add_argument('--dev_parse_tree', required=True,
+arg_parser.add_argument('--dev_parse_files', required=True,
                         help='Comma-separated list of development data parse files')
-arg_parser.add_argument('--test_parse_tree', required=True,
-                        help='Comma-separated list of test data parse files')
 arg_parser.add_argument('--save_dir', required=True,
                         help='Directory to save models, outputs, etc.')
 # todo load this more generically, so that we can have diff stats per task
@@ -85,33 +85,33 @@ if not os.path.exists(args.save_dir):
 
 train_filenames = args.train_files.split(',')
 dev_filenames = args.dev_files.split(',')
-dev_parse_tree=args.dev_parse_tree.split(',')
-train_parse_tree=args.train_parse_tree.split(',')
+dev_parse_files=args.dev_parse_files.split(',')
+train_parse_files=args.train_parse_files.split(',')
 
-vocab = Vocab(data_config, args.save_dir, train_filenames)
-vocab.update(dev_filenames)
+vocab = Vocab(data_config, args.save_dir, train_filenames, train_parse_files)
+vocab.update(dev_filenames, dev_parse_files)
 
-embedding_files = [embeddings_map['pretrained_embeddings'] for embeddings_map in model_config['embeddings'].values()
-                   if 'pretrained_embeddings' in embeddings_map]
-
+embedding_files = list(set([embeddings_map['pretrained_embeddings'] for embeddings_map in model_config['embeddings'].values()
+                   if 'pretrained_embeddings' in embeddings_map]))
 
 def train_input_fn():
-  return train_utils.get_input_fn(vocab, data_config, train_filenames, hparams.batch_size,
+  return train_utils.get_input_fn(vocab, data_config, train_filenames, train_parse_files, hparams.batch_size,
                                   num_epochs=hparams.num_train_epochs, shuffle=True, embedding_files=embedding_files,
                                   shuffle_buffer_multiplier=hparams.shuffle_buffer_multiplier)
 
 
 def dev_input_fn():
-  return train_utils.get_input_fn(vocab, data_config, dev_filenames, hparams.batch_size, num_epochs=1, shuffle=False,
+  return train_utils.get_input_fn(vocab, data_config, dev_filenames, dev_filenames, hparams.batch_size, num_epochs=1, shuffle=False,
                                   embedding_files=embedding_files)
 
 
 # Generate mappings from feature/label names to indices in the model_fn inputs
 feature_idx_map = {}
 label_idx_map = {}
-for i, f in enumerate([d for d in data_config.keys() if
+for i, f in enumerate([d for d in data_config.keys() if 
                        ('feature' in data_config[d] and data_config[d]['feature']) or
                        ('label' in data_config[d] and data_config[d]['label'])]):
+  # pdb.set_trace()
   if 'feature' in data_config[f] and data_config[f]['feature']:
     feature_idx_map[f] = i
   if 'label' in data_config[f] and data_config[f]['label']:
@@ -121,7 +121,6 @@ for i, f in enumerate([d for d in data_config.keys() if
       label_idx_map[f] = (i, j)
     else:
       label_idx_map[f] = (i, i+1)
-
 
 # Initialize the model
 model = LISAModel(hparams, model_config, layer_task_config, layer_attention_config, feature_idx_map, label_idx_map,
@@ -145,7 +144,8 @@ train_spec = tf.estimator.TrainSpec(input_fn=train_input_fn)
 eval_spec = tf.estimator.EvalSpec(input_fn=dev_input_fn, throttle_secs=hparams.eval_throttle_secs,
                                   exporters=[save_best_exporter])
 
-pdb.set_trace()
+# pdb.set_trace()
 
 # Run training
+# pdb.set_trace()
 tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
