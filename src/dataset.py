@@ -115,20 +115,20 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
     # elp = itp.get_next()
     zippedDatatset = tf.data.Dataset.zip((dataset, parseset))
     zippedDatatset = zippedDatatset.cache()
-    it = zippedDatatset.make_initializable_iterator()
-    # 
-    with tf.Session() as sess:
-      sess.run(tf.global_variables_initializer())
-      sess.run([it.initializer, tf.tables_initializer()]) 
-      pdb.set_trace()
-      pdb.set_trace()
+    # it = zippedDatatset.make_initializable_iterator()
+    # # 
+    # with tf.Session() as sess:
+    #   sess.run(tf.global_variables_initializer())
+    #   sess.run([it.initializer, tf.tables_initializer()]) 
+    #   pdb.set_trace()
+    #   pdb.set_trace()
     #   while (eld = sess.run(it.get_next())): print(eld)
     #     pdb.set_trace()
     # # shuffle and expand out epochs if training
     # pdb.set_trace()
 
    
-    zippedDatatset = zippedDatatset.apply(tf.contrib.data.bucket_by_sequence_length(element_length_func=lambda d, t: max(tf.shape(d)[0], tf.shape(t)[0]),\
+    zippedDatatset = zippedDatatset.apply(tf.contrib.data.bucket_by_sequence_length(element_length_func=lambda d, t: tf.shape(d)[0]+ tf.shape(t)[0],\
                                                               bucket_boundaries=bucket_boundaries,
                                                               bucket_batch_sizes=bucket_batch_sizes,
                                                               padded_shapes=zippedDatatset.output_shapes,
