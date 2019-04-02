@@ -1,6 +1,6 @@
 import tensorflow as tf
 import constants
-from data_generator import conll_data_generator, serialized_tree_generator
+from data_generator import conll_data_generator, serialized_tree_generator, conll_data_generator2, serialized_tree_generator2
 from tensorflow.contrib.data.python.ops import grouping
 from tensorflow.python.ops import array_ops
 import pdb
@@ -42,6 +42,8 @@ def map_strings_to_ints(vocab_lookup_ops, data_config, feature_label_names):
 
   return _mapper
 
+
+
 def element_length_fn(x, y):
    return tf.shape(x)[0]
 
@@ -64,36 +66,32 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
                            ('label' in data_config[d] and data_config[d]['label'])]
     parse_feature_names = [d for d in data_config.keys() if 'parse_tree_type' in d]
 
-    my_gen = serialized_tree_generator(parse_tree_filenames, data_config)
-
-
     parseset = tf.data.Dataset.from_generator(lambda: serialized_tree_generator(parse_tree_filenames, data_config),output_shapes=[None], output_types=tf.string)
                                              
-
     # intmap the dataset
     parseset = parseset.map(map_strings_to_ints(vocab_lookup_ops, data_config, parse_feature_names), num_parallel_calls=8)
-    # dataset = dataset.map(map_strings_to_ints(vocab_lookup_ops, data_config, feature_label_names))
-
     parseset = parseset.cache()
-
-
     # print(next(iter(my_gen)))
     dataset = tf.data.Dataset.from_generator(lambda: conll_data_generator(data_filenames, parse_tree_filenames, data_config),
                                              output_shapes=[None, None], output_types=tf.string)
-
     # intmap the dataset
     dataset = dataset.map(map_strings_to_ints(vocab_lookup_ops, data_config, feature_label_names), num_parallel_calls=8)
-    # dataset = dataset.map(map_strings_to_ints(vocab_lookup_ops, data_config, feature_label_names))
-
     dataset = dataset.cache()
     
-
-
-
-    
-    
-
-
+    '''
+    dataset = tf.data.Dataset.from_generator(lambda: conll_data_generator2(data_filenames, parse_tree_filenames, data_config), (tf.string, tf.string))                                           
+    itd = dataset.make_initializable_iterator()
+    # itp = parseset.make_initializable_iterator()
+    eld = itd.get_next()
+    # elp = itp.get_next()
+    with tf.Session() as sess:
+      pdb.set_trace()
+      sess.run(tf.global_variables_initializer())
+      sess.run([itd.initializer, tf.tables_initializer()]) #[itd.initializer, itp.initializer, tf.tables_initializer()]
+      aa = sess.run(eld)
+    #   aap = sess.run(elp)
+      pdb.set_trace()  
+    '''
 
     # do batching
     dataset = dataset.apply(tf.contrib.data.bucket_by_sequence_length(element_length_func=lambda d: tf.shape(d)[0],
@@ -108,8 +106,21 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
                                                                       padded_shapes=parseset.output_shapes,
                                                                       padding_values=constants.PAD_VALUE)) 
 
-    # pdb.set_trace()
+    
+    # itd = dataset.make_initializable_iterator()
+    # itp = parseset.make_initializable_iterator()
+    # eld = itd.get_next()
+    # elp = itp.get_next()
+    # with tf.Session() as sess:
+    #   pdb.set_trace()
+    #   sess.run(tf.global_variables_initializer())
+    #   sess.run([itd.initializer, itp.initializer, tf.tables_initializer()]) 
+
+    #   aa = sess.run(eld)
+    #   aap = sess.run(elp)
+    #   pdb.set_trace()
     # shuffle and expand out epochs if training
+    pdb.set_trace()
     zippedDatatset = tf.data.Dataset.zip((dataset, parseset))
     if shuffle:
       zippedDatatset = zippedDatatset.apply(tf.contrib.data.shuffle_and_repeat(buffer_size=batch_size*shuffle_buffer_multiplier,
@@ -123,6 +134,6 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
     iterator = zippedDatatset.make_initializable_iterator()
     tf.add_to_collection(tf.GraphKeys.TABLE_INITIALIZERS, iterator.initializer)
     
-    # pdb.set_treace()
+    # pdb.set_trace()
 
     return iterator.get_next()

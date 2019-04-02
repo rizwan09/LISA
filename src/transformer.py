@@ -1,6 +1,7 @@
 import tensorflow as tf
 import constants
 import nn_utils
+import pdb
 
 '''
 Much of this code is adapted from the Tensor2Tensor Transformer implementation:
@@ -260,3 +261,78 @@ def transformer(inputs, seq_lengths, head_size, num_heads, attn_dropout, relu_dr
       x = tf.add(x, tf.nn.dropout(y, prepost_dropout))
 
     return x
+
+
+def syntax_aware_semantic(inputs, parse_tree_inputs, seq_lengths, parse_tree_seq_lengths, head_size, num_heads, attn_dropout, relu_dropout, prepost_dropout,
+                relu_hidden_size, special_attention, special_values):
+  # https://www.tensorflow.org/alpha/tutorials/sequences/nmt_with_attention
+  with tf.name_scope('syntax_aware_semantic_layer'):
+    bias = mask = attention_bias_ignore_padding(seq_lengths)
+    parse_tree_bias = attention_bias_ignore_padding(parse_tree_seq_lengths)
+    antecedent = nn_utils.layer_norm(inputs)
+    parse_tree_antecedent = nn_utils.layer_norm(parse_tree_inputs)
+
+
+    with tf.variable_scope("attention",values=[antecedent, parse_tree_antecedent]):
+      #input = syntax_aware_semantic representation of x and parse_tree_x
+      # pdb.set_trace()
+      parse_tree_input_size = parse_tree_antecedent.get_shape()[-1]
+
+      total_output_size = head_size * num_heads
+
+      num_basic_attention_heads = num_heads - len(special_attention)
+      num_basic_value_heads = num_heads - len(special_values)
+
+      total_basic_key_size = num_basic_attention_heads * head_size
+      total_basic_value_size = num_basic_value_heads * head_size
+
+      parse_tree_q, parse_tree_k, parse_tree_v = compute_qkv(parse_tree_antecedent, parse_tree_input_size, total_basic_key_size, total_basic_value_size)
+      # Not needed for contextualized attention
+      parse_tree_q = split_heads(parse_tree_q, num_basic_attention_heads) 
+      parse_tree_k = split_heads(parse_tree_k, num_basic_attention_heads)
+      parse_tree_v = split_heads(parse_tree_v, num_basic_value_heads)
+
+      input_size = antecedent.get_shape()[-1]
+      q, k, v = compute_qkv(antecedent, input_size, total_basic_key_size, total_basic_value_size)
+      q = split_heads(q, num_basic_attention_heads)
+      k = split_heads(k, num_basic_attention_heads)
+      v = split_heads(v, num_basic_value_heads)
+
+      # concat special_values to beginning of values; first k attention heads
+      # will attend to k special values
+      special_values = list(map(lambda x: tf.expand_dims(x, 1), special_values))
+      parse_tree_v = tf.concat(special_values + [parse_tree_v], axis=1)
+
+
+      '''# key_depth_per_head = total_key_depth // num_heads
+      # q *= head_size**-0.5
+      # pdb.set_trace()
+      # with tf.Session() as sess:
+        # pdb.set_trace()
+        # sess.run(tf.global_variables_initializer())
+        # sess.run([ tf.tables_initializer()]) 
+        # sess.run(parse_tree_v)
+        # pdb.set_trace()
+      # pdb.set_trace()'''
+
+
+      x, attn_weights = dot_product_attention(q, parse_tree_k, parse_tree_v, bias, special_attention, attn_dropout)
+      x = combine_heads(x)
+      params = tf.get_variable("final_proj", [1, 1, total_output_size, total_output_size])
+      x = tf.expand_dims(x, 1)
+      x = tf.nn.conv2d(x, params, [1, 1, 1, 1], "SAME")
+      x = tf.squeeze(x, 1)
+
+    with tf.name_scope('transformer_layer'):
+      with tf.variable_scope("self_attention"):
+        x = nn_utils.layer_norm(x)
+        y, attn_weights = multihead_attention(x, mask, num_heads, head_size, attn_dropout, special_attention,
+                                              special_values)
+        x = tf.add(x, tf.nn.dropout(y, prepost_dropout))
+
+      with tf.variable_scope("ffnn"):
+        x = nn_utils.layer_norm(x)
+        y = conv_hidden_relu(x, relu_hidden_size, num_heads * head_size, relu_dropout)
+        x = tf.add(x, tf.nn.dropout(y, prepost_dropout))
+
+      return x

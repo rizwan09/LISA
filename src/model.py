@@ -87,6 +87,7 @@ class LISAModel:
     pretrained_embeddings /= np.std(pretrained_embeddings)
     return pretrained_embeddings
 
+  #labels are basically parse_tree_type
   def model_fn(self, features, labels, mode):
 
     # todo can estimators handle dropout for us or do we need to do it on our own?
@@ -97,24 +98,37 @@ class LISAModel:
       batch_shape = tf.shape(features)
       batch_size = batch_shape[0]
       batch_seq_len = batch_shape[1]
+
+      parse_batch_shape = tf.shape(labels)
+      parse_batch_size = parse_batch_shape[0]
+      parse_batch_seq_len = parse_batch_shape[1]
+
+
       layer_config = self.model_config['layers']
       sa_hidden_size = layer_config['head_dim'] * layer_config['num_heads']
 
       feats = {f: features[:, :, idx] for f, idx in self.feature_idx_map.items()}
       # pdb.set_trace()
 
-      # todo this assumes that word_type is always passed in
+      # todo this assumes that woård_type is always passed in
       words = feats['word_type']
 
       # for masking out padding tokens
       tokens_to_keep = tf.where(tf.equal(words, constants.PAD_VALUE), tf.zeros([batch_size, batch_seq_len]),
                                 tf.ones([batch_size, batch_seq_len]))
+      
+      parse_tree_feats={'parse_tree_type': labels}
+      parse_tree_type=parse_tree_feats['parse_tree_type']
+      parse_tree_tokens_to_keep = tf.where(tf.equal(parse_tree_type, constants.PAD_VALUE), tf.zeros([parse_batch_size, parse_batch_seq_len]),
+                                tf.ones([parse_batch_size, parse_batch_seq_len]))
 
       # Extract named features from monolithic "features" input
       feats = {f: tf.multiply(tf.cast(tokens_to_keep, tf.int32), v) for f, v in feats.items()}
-
+      parse_tree_feats = {f: tf.multiply(tf.cast(parse_tree_tokens_to_keep, tf.int32), v) for f, v in parse_tree_feats.items()}
+      
       # Extract named labels from monolithic "features" input, and mask them
       # todo fix masking -- is it even necessary?
+      
       labels = {}
       for l, idx in self.label_idx_map.items():
         these_labels = features[:, :, idx[0]:idx[1]] if idx[1] != -1 else features[:, :, idx[0]:]
@@ -156,15 +170,31 @@ class LISAModel:
         tf.logging.log(tf.logging.INFO, "Added %s to inputs list." % input_name)
       current_input = tf.concat(inputs_list, axis=2)
       current_input = tf.nn.dropout(current_input, hparams.input_dropout)
+      
+      #parse_tree_type_input
+      parse_tree_inputs_list = []
+      for input_name in self.model_config['parse_tree_inputs']:
+        input_values = parse_tree_feats[input_name]
+        input_embedding_lookup = tf.nn.embedding_lookup(embeddings[input_name], input_values)
+        parse_tree_inputs_list.append(input_embedding_lookup)
+        tf.logging.log(tf.logging.INFO, "Added %s to parse_tree_inputs list." % input_name)
+      if len(parse_tree_inputs_list)>1: current_parse_tree_input = tf.concat(parse_tree_inputs_list, axis=2)
+      else: current_parse_tree_input = parse_tree_inputs_list[0]
+      current_parse_tree_input = tf.nn.dropout(current_parse_tree_input, hparams.input_dropout)
+
 
       with tf.variable_scope('project_input'):
-        current_input = nn_utils.MLP(current_input, sa_hidden_size, n_splits=1)
+        current_input = nn_utils.MLP(current_input, sa_hidden_size, n_splits=1) #BATCH X SEQ X 200
+        current_parse_tree_input = nn_utils.MLP(current_parse_tree_input, sa_hidden_size, n_splits=1) #PARSE_BATCH X SEQ X 200
+
 
       predictions = {}
       eval_metric_ops = {}
       export_outputs = {}
       loss = tf.constant(0.)
       items_to_log = {}
+
+      # pdb.set_trace()
 
       num_layers = max(self.task_config.keys()) + 1
       tf.logging.log(tf.logging.INFO, "Creating transformer model with %d layers" % num_layers)
@@ -175,6 +205,8 @@ class LISAModel:
 
             special_attn = []
             special_values = []
+            empty_special_attn = []
+            empty_special_values = []
             if i in self.attention_config:
 
               this_layer_attn_config = self.attention_config[i]
@@ -191,18 +223,31 @@ class LISAModel:
                   this_special_values = value_fns.dispatch(value_fn_map['name'])(**value_fn_params)
                   special_values.append(this_special_values)
 
+            # pdb.set_trace()
             current_input = transformer.transformer(current_input, tokens_to_keep, layer_config['head_dim'],
                                                     layer_config['num_heads'], hparams.attn_dropout,
                                                     hparams.ff_dropout, hparams.prepost_dropout,
                                                     layer_config['ff_hidden_size'], special_attn, special_values)
+            
+            current_parse_tree_input = transformer.transformer(current_parse_tree_input, parse_tree_tokens_to_keep, layer_config['head_dim'],
+                                                    layer_config['num_heads'], hparams.attn_dropout,
+                                                    hparams.ff_dropout, hparams.prepost_dropout,
+                                                    layer_config['ff_hidden_size'], empty_special_attn, empty_special_values)
+
             if i in self.task_config:
 
               # if normalization is done in layer_preprocess, then it should also be done
               # on the output, since the output can grow very large, being the sum of
               # a whole stack of unnormalized layer outputs.
+              current_input = transformer.syntax_aware_semantic(current_input, current_parse_tree_input, tokens_to_keep, parse_tree_tokens_to_keep, layer_config['head_dim'],
+                                                    layer_config['num_heads'], hparams.attn_dropout,
+                                                    hparams.ff_dropout, hparams.prepost_dropout,
+                                                    layer_config['ff_hidden_size'], special_attn, special_values)
               current_input = nn_utils.layer_norm(current_input)
+              # current_parse_tree_input = nn_utils.layer_norm(current_parse_tree_input)
 
               # todo test a list of tasks for each layer
+
               for task, task_map in self.task_config[i].items():
                 task_labels = labels[task]
                 task_vocab_size = self.vocab.vocab_names_sizes[task] if task in self.vocab.vocab_names_sizes else -1

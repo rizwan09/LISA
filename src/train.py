@@ -101,7 +101,7 @@ def train_input_fn():
 
 
 def dev_input_fn():
-  return train_utils.get_input_fn(vocab, data_config, dev_filenames, dev_filenames, hparams.batch_size, num_epochs=1, shuffle=False,
+  return train_utils.get_input_fn(vocab, data_config, dev_filenames, dev_parse_files, hparams.batch_size, num_epochs=1, shuffle=False,
                                   embedding_files=embedding_files)
 
 
