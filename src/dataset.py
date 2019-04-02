@@ -70,58 +70,69 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
                                              
     # intmap the dataset
     parseset = parseset.map(map_strings_to_ints(vocab_lookup_ops, data_config, parse_feature_names), num_parallel_calls=8)
-    parseset = parseset.cache()
+    # parseset = parseset.cache()
     # print(next(iter(my_gen)))
     dataset = tf.data.Dataset.from_generator(lambda: conll_data_generator(data_filenames, parse_tree_filenames, data_config),
                                              output_shapes=[None, None], output_types=tf.string)
     # intmap the dataset
     dataset = dataset.map(map_strings_to_ints(vocab_lookup_ops, data_config, feature_label_names), num_parallel_calls=8)
-    dataset = dataset.cache()
+    # dataset = dataset.cache()
+    
+    
     
     '''
-    dataset = tf.data.Dataset.from_generator(lambda: conll_data_generator2(data_filenames, parse_tree_filenames, data_config), (tf.string, tf.string))                                           
-    itd = dataset.make_initializable_iterator()
-    # itp = parseset.make_initializable_iterator()
-    eld = itd.get_next()
-    # elp = itp.get_next()
-    with tf.Session() as sess:
-      pdb.set_trace()
-      sess.run(tf.global_variables_initializer())
-      sess.run([itd.initializer, tf.tables_initializer()]) #[itd.initializer, itp.initializer, tf.tables_initializer()]
-      aa = sess.run(eld)
-    #   aap = sess.run(elp)
-      pdb.set_trace()  
-    '''
+    # zippedDatatset = tf.data.Dataset.zip((dataset, parseset))
+    # itd = zippedDatatset.make_initializable_iterator()
+    # eld = itd.get_next()
+    # with tf.Session() as sess:
+    #   pdb.set_trace()
+    #   sess.run(tf.global_variables_initializer())
+    #   sess.run([itd.initializer, tf.tables_initializer()]) #[itd.initializer, itp.initializer, tf.tables_initializer()]
+    #   aa = sess.run(eld)
+    #   pdb.set_trace()  
+    #   zippedDatatset = zippedDatatset.apply(tf.contrib.data.bucket_by_sequence_length(element_length_func=lambda d, t:tf.shape(d)[0]+tf.shape(t)[1], bucket_boundaries=bucket_boundaries,bucket_batch_sizes=bucket_batch_sizes,padded_shapes=zippedDatatset.output_shapes,padding_values=(constants.PAD_VALUE, constants.PAD_VALUE)))
+    #   pdb.set_trace()
+   
 
     # do batching
-    dataset = dataset.apply(tf.contrib.data.bucket_by_sequence_length(element_length_func=lambda d: tf.shape(d)[0],
-                                                                      bucket_boundaries=bucket_boundaries,
-                                                                      bucket_batch_sizes=bucket_batch_sizes,
-                                                                      padded_shapes=dataset.output_shapes,
-                                                                      padding_values=constants.PAD_VALUE))
+    # dataset = dataset.apply(tf.contrib.data.bucket_by_sequence_length(element_length_func=lambda d: tf.shape(d)[0],
+    #                                                                   bucket_boundaries=bucket_boundaries,
+    #                                                                   bucket_batch_sizes=bucket_batch_sizes,
+    #                                                                   padded_shapes=dataset.output_shapes,
+    #                                                                   padding_values=constants.PAD_VALUE))
     
-    parseset = parseset.apply(tf.contrib.data.bucket_by_sequence_length(element_length_func=lambda d: tf.shape(d)[0],
-                                                                      bucket_boundaries=bucket_boundaries,
-                                                                      bucket_batch_sizes=bucket_batch_sizes,
-                                                                      padded_shapes=parseset.output_shapes,
-                                                                      padding_values=constants.PAD_VALUE)) 
+    # parseset = parseset.apply(tf.contrib.data.bucket_by_sequence_length(element_length_func=lambda d: tf.shape(d)[0],
+                                                                      # bucket_boundaries=bucket_boundaries,
+                                                                      # bucket_batch_sizes=bucket_batch_sizes,
+                                                                      # padded_shapes=parseset.output_shapes,
+                                                                      # padding_values=constants.PAD_VALUE)) 
 
     
+    '''
     # itd = dataset.make_initializable_iterator()
     # itp = parseset.make_initializable_iterator()
     # eld = itd.get_next()
     # elp = itp.get_next()
-    # with tf.Session() as sess:
-    #   pdb.set_trace()
-    #   sess.run(tf.global_variables_initializer())
-    #   sess.run([itd.initializer, itp.initializer, tf.tables_initializer()]) 
-
-    #   aa = sess.run(eld)
-    #   aap = sess.run(elp)
-    #   pdb.set_trace()
-    # shuffle and expand out epochs if training
-    pdb.set_trace()
     zippedDatatset = tf.data.Dataset.zip((dataset, parseset))
+    zippedDatatset = zippedDatatset.cache()
+    it = zippedDatatset.make_initializable_iterator()
+    # 
+    with tf.Session() as sess:
+      sess.run(tf.global_variables_initializer())
+      sess.run([it.initializer, tf.tables_initializer()]) 
+      pdb.set_trace()
+      pdb.set_trace()
+    #   while (eld = sess.run(it.get_next())): print(eld)
+    #     pdb.set_trace()
+    # # shuffle and expand out epochs if training
+    # pdb.set_trace()
+
+   
+    zippedDatatset = zippedDatatset.apply(tf.contrib.data.bucket_by_sequence_length(element_length_func=lambda d, t: max(tf.shape(d)[0], tf.shape(t)[0]),\
+                                                              bucket_boundaries=bucket_boundaries,
+                                                              bucket_batch_sizes=bucket_batch_sizes,
+                                                              padded_shapes=zippedDatatset.output_shapes,
+                                                              padding_values=(constants.PAD_VALUE, constants.PAD_VALUE)))
     if shuffle:
       zippedDatatset = zippedDatatset.apply(tf.contrib.data.shuffle_and_repeat(buffer_size=batch_size*shuffle_buffer_multiplier,
                                                                  count=num_epochs))
@@ -136,4 +147,4 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
     
     # pdb.set_trace()
 
-    return iterator.get_next()
+    return iterator.get_next(), iterator.get_next()

@@ -304,19 +304,20 @@ def syntax_aware_semantic(inputs, parse_tree_inputs, seq_lengths, parse_tree_seq
       parse_tree_v = tf.concat(special_values + [parse_tree_v], axis=1)
 
 
-      '''# key_depth_per_head = total_key_depth // num_heads
-      # q *= head_size**-0.5
+      # key_depth_per_head = total_key_depth // num_heads
+      q *= head_size**-0.5
+      
       # pdb.set_trace()
       # with tf.Session() as sess:
-        # pdb.set_trace()
-        # sess.run(tf.global_variables_initializer())
-        # sess.run([ tf.tables_initializer()]) 
-        # sess.run(parse_tree_v)
-        # pdb.set_trace()
-      # pdb.set_trace()'''
+      #   pdb.set_trace()
+      #   sess.run(tf.global_variables_initializer())
+      #   sess.run([ tf.tables_initializer()]) 
+      #   aa=sess.run(parse_tree_v)
+      #   pdb.set_trace()
+      # if parse_tree_v.shape[-1]!= q.shape[-1]: pdb.set_trace()
 
 
-      x, attn_weights = dot_product_attention(q, parse_tree_k, parse_tree_v, bias, special_attention, attn_dropout)
+      x, attn_weights = dot_product_attention(q, parse_tree_k, parse_tree_v, parse_tree_bias, special_attention, attn_dropout)
       x = combine_heads(x)
       params = tf.get_variable("final_proj", [1, 1, total_output_size, total_output_size])
       x = tf.expand_dims(x, 1)
