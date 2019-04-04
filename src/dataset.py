@@ -8,12 +8,11 @@ import pdb
 def map_strings_to_ints(vocab_lookup_ops, data_config, feature_label_names):
   # def _mapper(d,t):
   def _mapper(d):
+    d = d[:10]
     intmapped = []
     inttree=None
     for i, datum_name in enumerate(feature_label_names):
       if 'vocab' in data_config[datum_name]:
-        # todo this is a little clumsy -- is there a better way to pass this info through?
-        # todo also we need the variable-length feat to come last, gross
         if 'type' in data_config[datum_name] and data_config[datum_name]['type'] == 'range':
           idx = data_config[datum_name]['conll_idx']
           if idx[1] == -1:
@@ -22,22 +21,14 @@ def map_strings_to_ints(vocab_lookup_ops, data_config, feature_label_names):
             last_idx = i + idx[1]
             intmapped.append(vocab_lookup_ops[data_config[datum_name]['vocab']].lookup(d[:, i:last_idx]))
         elif 'parse_tree_type' in datum_name:
-          # inttree.append(vocab_lookup_ops[data_config[datum_name]['vocab']].lookup(t))
           inttree=tf.reshape(vocab_lookup_ops[data_config[datum_name]['vocab']].lookup(d), [-1])
-          # pdb.set_trace()
         else:
           intmapped.append(tf.expand_dims(vocab_lookup_ops[data_config[datum_name]['vocab']].lookup(d[:, i]), -1))
       else:
         intmapped.append(tf.expand_dims(tf.string_to_number(d[:, i], out_type=tf.int64), -1))
 
-    # this is where the order of features/labels in input gets defined
-    # todo: can i have these come out of the lookup as int32?
-    # pdb.set_trace()
-    # pdb.set_trace()
-    # return [tf.cast(tf.concat(intmapped, axis=-1), tf.int32), tf.cast(tf.concat(inttree, axis=-1), tf.int32)]
     if len(intmapped)>0: return tf.cast(tf.concat(intmapped, axis=-1), tf.int32)
     if inttree is not None: 
-      # pdb.set_trace()
       return tf.cast(inttree, tf.int32)
 
   return _mapper
@@ -56,20 +47,23 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
 
   # todo do something smarter with multiple files + parallel?
 
-  with tf.device('/cpu:0'):
 
-    # get the names of data fields in data_config that correspond to features or labels,
-    # and thus that we want to load into batches
-
-    feature_label_names = [d for d in data_config.keys() if 'parse_tree' not in d and\
-                           ('feature' in data_config[d] and data_config[d]['feature']) or
-                           ('label' in data_config[d] and data_config[d]['label'])]
+  with tf.device('/cpu:0'): 
+  # with constants.MIRRORED_STRATEGY.scope():
     parse_feature_names = [d for d in data_config.keys() if 'parse_tree_type' in d]
 
     parseset = tf.data.Dataset.from_generator(lambda: serialized_tree_generator(parse_tree_filenames, data_config),output_shapes=[None], output_types=tf.string)
                                              
     # intmap the dataset
     parseset = parseset.map(map_strings_to_ints(vocab_lookup_ops, data_config, parse_feature_names), num_parallel_calls=8)
+    
+  # with tf.device('/gpu:1'):
+    # get the names of data fields in data_config that correspond to features or labels,
+    # and thus that we want to load into batches
+
+    feature_label_names = [d for d in data_config.keys() if 'parse_tree' not in d and\
+                           ('feature' in data_config[d] and data_config[d]['feature']) or
+                           ('label' in data_config[d] and data_config[d]['label'])]
     # parseset = parseset.cache()
     # print(next(iter(my_gen)))
     dataset = tf.data.Dataset.from_generator(lambda: conll_data_generator(data_filenames, parse_tree_filenames, data_config),
@@ -113,10 +107,11 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
     # itp = parseset.make_initializable_iterator()
     # eld = itd.get_next()
     # elp = itp.get_next()
+  # with tf.device('/cpu:3'):
     zippedDatatset = tf.data.Dataset.zip((dataset, parseset))
     zippedDatatset = zippedDatatset.cache()
     # it = zippedDatatset.make_initializable_iterator()
-    # # 
+    # 
     # with tf.Session() as sess:
     #   sess.run(tf.global_variables_initializer())
     #   sess.run([it.initializer, tf.tables_initializer()]) 
@@ -126,6 +121,10 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
     #     pdb.set_trace()
     # # shuffle and expand out epochs if training
     # pdb.set_trace()
+    # if input_context:
+    #   tf.logging.log(tf.logging.INFO,'Sharding the dataset: input_pipeline_id=%d num_input_pipelines=%d' % (input_context.input_pipeline_id, input_context.num_input_pipelines))
+      # zippedDatatset = zippedDatatset.shard(input_context.num_input_pipelines,
+      #                         input_context.input_pipeline_id)
 
    
     zippedDatatset = zippedDatatset.apply(tf.contrib.data.bucket_by_sequence_length(element_length_func=lambda d, t: tf.shape(d)[0]+ tf.shape(t)[0],\
@@ -147,4 +146,4 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
     
     # pdb.set_trace()
 
-    return iterator.get_next(), iterator.get_next()
+    return iterator.get_next()

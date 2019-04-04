@@ -1,15 +1,18 @@
 import time
+# import tensorflow as tf
 
 PAD_VALUE = -1
 JOINT_LABEL_SEP = '/'
 
 OOV_STRING = "<OOV>"
 
-# DEFAULT_BUCKET_BOUNDARIES = [20, 30, 50, 80]
-DEFAULT_BUCKET_BOUNDARIES = [40, 70, 100, 150]#, 170, 200, 250, 300, 450, 600, 750]
+DEFAULT_BUCKET_BOUNDARIES = [20, 30, 50, 80]
+# DEFAULT_BUCKET_BOUNDARIES = [40, 70, 100, 150, 170, 200, 250, 300, 450, 600, 750, 850]
 
 VERY_LARGE = 1e9
 VERY_SMALL = -1e9
+
+# MIRRORED_STRATEGY = tf.contrib.distribute.MirroredStrategy()
 
 # Optimizer hyperparameters
 hparams = {
@@ -22,7 +25,7 @@ hparams = {
   'epsilon': 1e-12,
   'use_nesterov': True,
   'batch_size': 256,
-  'shuffle_buffer_multiplier': 100,
+  'shuffle_buffer_multiplier': 1,
   'eval_throttle_secs': 1000,
   'eval_every_steps': 1000,
   'num_train_epochs': 10000,

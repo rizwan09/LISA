@@ -4,7 +4,7 @@ import os
 from functools import partial
 import train_utils
 from vocab import Vocab
-from model import LISAModel
+from model_ori import LISAModel
 import numpy as np
 import sys, pdb
 
@@ -130,6 +130,7 @@ if args.debug:
   tf.logging.log(tf.logging.INFO, "Created trainable variables: %s" % str([v.name for v in tf.trainable_variables()]))
 
 # Set up the Estimator
+# mirrored_strategy = tf.distribute.MirroredStrategy()
 checkpointing_config = tf.estimator.RunConfig(save_checkpoints_steps=hparams.eval_every_steps, keep_checkpoint_max=1)
 estimator = tf.estimator.Estimator(model_fn=model.model_fn, model_dir=args.save_dir, config=checkpointing_config)
 

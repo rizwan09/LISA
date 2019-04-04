@@ -93,14 +93,14 @@ def serialized_tree_generator2(parse_tree_filenames, data_config):
   return mat
 
 
-def conll_data_generator2(filenames, parsefilenames, data_config):
-  for (filename, parsefilename) in zip(filenames, parsefilenames):
-    with open(filename, 'r') as f, open(parsefilename, 'r') as pf:
+def conll_data_generator2(filenames, data_config):
+  for filename in filenames:
+    with open(filename, 'r') as f:
       sents = 0
       toks = 0
       buf = []
-      mat = []
-      parsetrees = pf.readlines()
+      # mat = []
+      # parsetrees = pf.readlines()
       for line in f:
         line = line.strip()
         if line:
@@ -128,13 +128,12 @@ def conll_data_generator2(filenames, parsefilenames, data_config):
           if buf:
             # buf.append(tuple(parsetrees[sents].lower().split()))
             # if sents<: pdb.set_trace()
-            yield (parsetrees[sents].lower().split(), buf)
-            mat.append(buf)
+            yield buf
+            # mat.append(buf)
             sents += 1
             buf = []
           # print()
       # catch the last one
       if buf:
         # pdb.set_trace()
-        yield (parsetrees[sents].lower().split(), buf)
-  return mat
+        yield buf#(parsetrees[sents].lower().split(), buf)
