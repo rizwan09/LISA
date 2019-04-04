@@ -25,7 +25,7 @@ hparams = {
   'epsilon': 1e-12,
   'use_nesterov': True,
   'batch_size': 256,
-  'shuffle_buffer_multiplier': 1,
+  'shuffle_buffer_multiplier': 5,
   'eval_throttle_secs': 1000,
   'eval_every_steps': 1000,
   'num_train_epochs': 10000,

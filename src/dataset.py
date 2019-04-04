@@ -8,7 +8,6 @@ import pdb
 def map_strings_to_ints(vocab_lookup_ops, data_config, feature_label_names):
   # def _mapper(d,t):
   def _mapper(d):
-    d = d[:10]
     intmapped = []
     inttree=None
     for i, datum_name in enumerate(feature_label_names):
@@ -21,6 +20,7 @@ def map_strings_to_ints(vocab_lookup_ops, data_config, feature_label_names):
             last_idx = i + idx[1]
             intmapped.append(vocab_lookup_ops[data_config[datum_name]['vocab']].lookup(d[:, i:last_idx]))
         elif 'parse_tree_type' in datum_name:
+          d = d[:100]
           inttree=tf.reshape(vocab_lookup_ops[data_config[datum_name]['vocab']].lookup(d), [-1])
         else:
           intmapped.append(tf.expand_dims(vocab_lookup_ops[data_config[datum_name]['vocab']].lookup(d[:, i]), -1))

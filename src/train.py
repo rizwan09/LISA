@@ -4,7 +4,8 @@ import os
 from functools import partial
 import train_utils
 from vocab import Vocab
-from model_ori import LISAModel
+# from model_ori import LISAModel
+from model import LISAModel
 import numpy as np
 import sys, pdb
 

@@ -3,6 +3,7 @@ import json
 import re
 import sys
 import dataset_ori as dataset
+import dataset
 import constants
 from pathlib import Path
 
@@ -34,10 +35,12 @@ def get_input_fn(vocab, data_config, data_files, parse_tree_files, batch_size, n
   # this needs to be created from here (lazily) so that it ends up in the same tf.Graph as everything else
   vocab_lookup_ops = vocab.create_vocab_lookup_ops(embedding_files)
   # print("In train_utils.get_input_fn")
-  # return dataset.get_data_iterator(data_files, parse_tree_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
-  #                                  shuffle_buffer_multiplier)
-  return dataset.get_data_iterator(data_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
+  #for my idea
+  return dataset.get_data_iterator(data_files, parse_tree_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
                                    shuffle_buffer_multiplier)
+  #for baseline
+  # return dataset.get_data_iterator(data_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
+  #                                  shuffle_buffer_multiplier)
 
 
 def load_json_configs(config_file_list, args=None):

@@ -5,7 +5,6 @@ from data_generator import conll_data_generator2
 
 def map_strings_to_ints(vocab_lookup_ops, data_config, feature_label_names):
   def _mapper(d):
-    d = d[:10]
     intmapped = []
     for i, datum_name in enumerate(feature_label_names):
       if 'vocab' in data_config[datum_name]:
