@@ -4,7 +4,7 @@ import os
 from functools import partial
 import train_utils
 from vocab import Vocab
-# from model_ori import LISAModel
+#from model_ori import LISAModel
 from model import LISAModel
 import numpy as np
 import sys, pdb
@@ -132,7 +132,10 @@ if args.debug:
 
 # Set up the Estimator
 # mirrored_strategy = tf.distribute.MirroredStrategy()
-checkpointing_config = tf.estimator.RunConfig(save_checkpoints_steps=hparams.eval_every_steps, keep_checkpoint_max=1)
+# distribution = tf.contrib.distribute.MirroredStrategy()
+# distribution = tf.contrib.distribute.CollectiveAllReduceStrategy(
+#       num_gpus_per_worker=2)
+checkpointing_config = tf.estimator.RunConfig(save_checkpoints_steps=hparams.eval_every_steps, keep_checkpoint_max=1)#, train_distribute=distribution)
 estimator = tf.estimator.Estimator(model_fn=model.model_fn, model_dir=args.save_dir, config=checkpointing_config)
 
 # Set up early stopping -- always keep the model with the best F1

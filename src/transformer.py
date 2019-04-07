@@ -306,7 +306,7 @@ def syntax_aware_semantic(inputs, parse_tree_inputs, seq_lengths, parse_tree_seq
 
       # key_depth_per_head = total_key_depth // num_heads
       q *= head_size**-0.5
-      
+
       # pdb.set_trace()
       # with tf.Session() as sess:
       #   pdb.set_trace()
@@ -318,22 +318,20 @@ def syntax_aware_semantic(inputs, parse_tree_inputs, seq_lengths, parse_tree_seq
 
 
       x, attn_weights = dot_product_attention(q, parse_tree_k, parse_tree_v, parse_tree_bias, special_attention, attn_dropout)
+      # pdb.set_trace()
       x = combine_heads(x)
-      params = tf.get_variable("final_proj", [1, 1, total_output_size, total_output_size])
-      x = tf.expand_dims(x, 1)
-      x = tf.nn.conv2d(x, params, [1, 1, 1, 1], "SAME")
-      x = tf.squeeze(x, 1)
+      # params = tf.get_variable("contextualized_proj", [1, 1, total_output_size, total_output_size])
+      # x = tf.expand_dims(x, 1)
+      # x = tf.nn.conv2d(x, params, [1, 1, 1, 1], "SAME")
+      # x = tf.squeeze(x, 1)
 
-    with tf.name_scope('transformer_layer'):
-      with tf.variable_scope("self_attention"):
-        x = nn_utils.layer_norm(x)
-        y, attn_weights = multihead_attention(x, mask, num_heads, head_size, attn_dropout, special_attention,
-                                              special_values)
-        x = tf.add(x, tf.nn.dropout(y, prepost_dropout))
+      xcat = tf.concat([antecedent,x], -1)
 
-      with tf.variable_scope("ffnn"):
-        x = nn_utils.layer_norm(x)
-        y = conv_hidden_relu(x, relu_hidden_size, num_heads * head_size, relu_dropout)
-        x = tf.add(x, tf.nn.dropout(y, prepost_dropout))
+      xcat = tf.add(xcat, tf.nn.dropout(xcat, prepost_dropout))
+      with tf.variable_scope("contextualized_ffnn"):
+        xcat = nn_utils.layer_norm(xcat)
+        y = conv_hidden_relu(xcat, relu_hidden_size, num_heads * head_size, relu_dropout)
+        xcat = tf.add(antecedent, tf.nn.dropout(y, prepost_dropout))
 
-      return x
+      
+      return xcat

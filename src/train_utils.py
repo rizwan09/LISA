@@ -2,7 +2,7 @@ import tensorflow as tf
 import json
 import re
 import sys
-import dataset_ori as dataset
+# import dataset_ori as dataset
 import dataset
 import constants
 from pathlib import Path
@@ -35,10 +35,10 @@ def get_input_fn(vocab, data_config, data_files, parse_tree_files, batch_size, n
   # this needs to be created from here (lazily) so that it ends up in the same tf.Graph as everything else
   vocab_lookup_ops = vocab.create_vocab_lookup_ops(embedding_files)
   # print("In train_utils.get_input_fn")
-  #for my idea
+  # #for my idea
   return dataset.get_data_iterator(data_files, parse_tree_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
                                    shuffle_buffer_multiplier)
-  #for baseline
+  # #for baseline
   # return dataset.get_data_iterator(data_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
   #                                  shuffle_buffer_multiplier)
 
@@ -143,6 +143,6 @@ def best_model_compare_fn(best_eval_result, current_eval_result, key):
 
 
 def serving_input_receiver_fn():
-  inputs = tf.placeholder(tf.int32, [None, None, None])
+  inputs = tf.placeholder(tf.int32, ([None, None, None], [None, None]))
   return tf.estimator.export.TensorServingInputReceiver(inputs, inputs)
 

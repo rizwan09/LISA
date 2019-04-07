@@ -3,6 +3,7 @@ import numpy as np
 import pdb
 
 def conll_data_generator(filenames, parsefilenames, data_config):
+  lengths = []
   for (filename, parsefilename) in zip(filenames, parsefilenames):
     with open(filename, 'r') as f, open(parsefilename, 'r') as pf:
       sents = 0
@@ -55,7 +56,8 @@ def conll_data_generator(filenames, parsefilenames, data_config):
           if buf:
             # buf.append(tuple(parsetrees[sents].lower().split()))
             # if sents<: pdb.set_trace()
-            yield buf#, parsetrees[sents].lower().split())
+            if sents<128:yield buf#, parsetrees[sents].lower().split())
+            lengths.append(len(buf))
             sents += 1
             buf = []
           # print()
@@ -63,8 +65,11 @@ def conll_data_generator(filenames, parsefilenames, data_config):
       if buf:
         # pdb.set_trace()
         yield buf
+  #pdb.set_trace()
+  print('max sentence lengths: ', max(lengths),len(lengths))
 
 def serialized_tree_generator(parse_tree_filenames, data_config):
+  lengths = []
   for filename in parse_tree_filenames:
     with open(filename, 'r') as f:
       sents = 0
@@ -74,7 +79,10 @@ def serialized_tree_generator(parse_tree_filenames, data_config):
         if line:
           toks += 1
           split_line = line.split()
-          yield split_line
+          if sents<128:yield split_line
+          lengths.append(len(split_line))
+  pdb.set_trace()
+  print('max tree lengths: ', max(lengths),len(lengths))
 
 
 def serialized_tree_generator2(parse_tree_filenames, data_config):
@@ -94,11 +102,13 @@ def serialized_tree_generator2(parse_tree_filenames, data_config):
 
 
 def conll_data_generator2(filenames, data_config):
+  lengths = []
   for filename in filenames:
     with open(filename, 'r') as f:
       sents = 0
       toks = 0
       buf = []
+      
       # mat = []
       # parsetrees = pf.readlines()
       for line in f:
@@ -129,6 +139,7 @@ def conll_data_generator2(filenames, data_config):
             # buf.append(tuple(parsetrees[sents].lower().split()))
             # if sents<: pdb.set_trace()
             yield buf
+            lengths.append(len(buf))
             # mat.append(buf)
             sents += 1
             buf = []
@@ -137,3 +148,6 @@ def conll_data_generator2(filenames, data_config):
       if buf:
         # pdb.set_trace()
         yield buf#(parsetrees[sents].lower().split(), buf)
+  #pdb.set_trace()
+  print(max(lengths))
+

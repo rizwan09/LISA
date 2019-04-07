@@ -12,7 +12,7 @@ arg_parser.add_argument('--dev_files',
                         help='Comma-separated list of development data files')
 arg_parser.add_argument('--save_dir', required=True,
                         help='Directory containing saved model')
-rg_parser.add_argument('--dev_parse_files', required=True,
+arg_parser.add_argument('--dev_parse_files', required=True,
                         help='Comma-separated list of development data parse files')
 arg_parser.add_argument('--test_parse_files', required=True,
                         help='Comma-separated list of test data parse files')
@@ -76,7 +76,7 @@ dev_parse_files=args.dev_parse_files.split(',')
 test_parse_files=args.test_parse_files.split(',') if args.test_parse_files else []
 
 vocab = Vocab(data_config, args.save_dir)
-vocab.update(test_filenames)
+vocab.update(test_filenames, test_parse_files)
 
 embedding_files = [embeddings_map['pretrained_embeddings'] for embeddings_map in model_config['embeddings'].values()
                    if 'pretrained_embeddings' in embeddings_map]
@@ -107,19 +107,20 @@ estimator = tf.estimator.Estimator(model_fn=model.model_fn, model_dir=args.save_
 
 
 def dev_input_fn():
-  return train_utils.get_input_fn(vocab, data_config, dev_filenames, hparams.batch_size, num_epochs=1, shuffle=False,
+  return train_utils.get_input_fn(vocab, data_config, dev_filenames, dev_parse_files, hparams.batch_size, num_epochs=1, shuffle=False,
                                   embedding_files=embedding_files)
+
 
 
 tf.logging.log(tf.logging.INFO, "Evaluating on dev files: %s" % str(dev_filenames))
 estimator.evaluate(input_fn=dev_input_fn) #checkpoint_path="%s/export/best_exporter" % args.save_dir)
 
-for test_file in test_filenames:
+for test_file, test_parse_file in zip(test_filenames, test_parse_files):
   def test_input_fn():
-    return train_utils.get_input_fn(vocab, data_config, [test_file], hparams.batch_size, num_epochs=1, shuffle=False,
+    return train_utils.get_input_fn(vocab, data_config, [test_file], [test_parse_file], hparams.batch_size, num_epochs=1, shuffle=False,
                                     embedding_files=embedding_files)
 
 
-  tf.logging.log(tf.logging.INFO, "Evaluating on test file: %s" % str(test_file))
+  tf.logging.log(tf.logging.INFO, "Evaluating on test file: %s, %s" % str(test_file), str(test_parse_file))
   estimator.evaluate(input_fn=test_input_fn) #, checkpoint_path="%s/export/best_exporter" % args.save_dir)
 
