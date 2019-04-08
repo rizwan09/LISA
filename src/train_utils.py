@@ -143,6 +143,6 @@ def best_model_compare_fn(best_eval_result, current_eval_result, key):
 
 
 def serving_input_receiver_fn():
-  inputs = tf.placeholder((tf.int32, tf.int32),([None, None, None], [None, None]))
+  inputs = tf.placeholder(tf.int32, [None, None, None], [None, None])
   return tf.estimator.export.TensorServingInputReceiver(inputs, inputs)
 

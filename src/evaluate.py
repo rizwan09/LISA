@@ -121,6 +121,6 @@ for test_file, test_parse_file in zip(test_filenames, test_parse_files):
                                     embedding_files=embedding_files)
 
 
-  tf.logging.log(tf.logging.INFO, "Evaluating on test file: %s, %s" % str(test_file), str(test_parse_file))
+  tf.logging.log(tf.logging.INFO, "Evaluating on test file: %s \t%s" % (test_file,test_parse_file))
   estimator.evaluate(input_fn=test_input_fn) #, checkpoint_path="%s/export/best_exporter" % args.save_dir)
 
