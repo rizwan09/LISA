@@ -70,6 +70,7 @@ def conll_data_generator(filenames, parsefilenames, data_config):
 
 def serialized_tree_generator(parse_tree_filenames, data_config):
   lengths = []
+  print('serialized_tree_gen')
   for filename in parse_tree_filenames:
     with open(filename, 'r') as f:
       sents = 0
@@ -81,7 +82,8 @@ def serialized_tree_generator(parse_tree_filenames, data_config):
           split_line = line.split()
           if sents<128:yield split_line
           lengths.append(len(split_line))
-  pdb.set_trace()
+          sents+=1
+  # pdb.set_trace()
   print('max tree lengths: ', max(lengths),len(lengths))
 
 
