@@ -2,7 +2,9 @@ import data_converters
 import numpy as np
 import pdb
 
+
 def conll_data_generator(filenames, parsefilenames, data_config):
+  print('in conll_data_generator')
   lengths = []
   for (filename, parsefilename) in zip(filenames, parsefilenames):
     with open(filename, 'r') as f, open(parsefilename, 'r') as pf:
@@ -53,10 +55,13 @@ def conll_data_generator(filenames, parsefilenames, data_config):
           buf = [('0', 'In', 'in', 'IN', '44', 'prep', 'False', 'IN/False', 'O', 'O', 'O', 'B-AM-LOC'), ('0', 'an', 'an', 'DT', '4', 'det', 'False', 'DT/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', 'Oct.', 'oct.', 'NNP', '4', 'nn', 'False', 'NNP/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', '19', '19', 'CD', '4', 'num', 'False', 'CD/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', 'review', 'review', 'NN', '0', 'pobj', 'False', 'NN/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', 'of', 'of', 'IN', '4', 'prep', 'False', 'IN/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', '``', '``', '``', '8', 'punct', 'False', '``/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', 'The', 'the', 'DT', '8', 'det', 'False', 'DT/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', 'Misanthrope', 'misanthrope', 'NN', '5', 'pobj', 'False', 'NN/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', "''", "''", "''", '8', 'punct', 'False', "''/False", 'O', 'O', 'O', 'I-AM-LOC'), ('0', 'at', 'at', 'IN', '8', 'prep', 'False', 'IN/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', 'Chicago', 'chicago', 'NNP', '14', 'poss', 'False', 'NNP/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', "'s", "'s", 'POS', '11', 'possessive', 'False', 'POS/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', 'Goodman', 'goodman', 'NNP', '14', 'nn', 'False', 'NNP/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', 'Theatre', 'theatre', 'NNP', '10', 'pobj', 'False', 'NNP/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', '(', '(', '-LRB-', '19', 'punct', 'False', '-LRB-/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', '``', '``', '``', '19', 'punct', 'False', '``/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', 'Revitalized', 'revitalized', 'VBN', '18', 'amod', 'True', 'VBN/True', 'B-V', 'B-A0', 'O', 'I-AM-LOC'), ('0', 'Classics', 'classics', 'NNS', '19', 'nsubj', 'False', 'NNS/False', 'B-A1', 'I-A0', 'O', 'I-AM-LOC'), ('0', 'Take', 'take', 'VBP', '4', 'dep', 'True', 'VBP/True', 'O', 'B-V', 'O', 'I-AM-LOC'), ('0', 'the', 'the', 'DT', '21', 'det', 'False', 'DT/False', 'O', 'B-A1', 'O', 'I-AM-LOC'), ('0', 'Stage', 'stage', 'NN', '19', 'dobj', 'False', 'NN/False', 'O', 'I-A1', 'O', 'I-AM-LOC'), ('0', 'in', 'in', 'IN', '19', 'prep', 'False', 'IN/False', 'O', 'B-AM-LOC', 'O', 'I-AM-LOC'), ('0', 'Windy', 'windy', 'NNP', '24', 'nn', 'False', 'NNP/False', 'O', 'I-AM-LOC', 'O', 'I-AM-LOC'), ('0', 'City', 'city', 'NNP', '22', 'pobj', 'False', 'NNP/False', 'O', 'I-AM-LOC', 'O', 'I-AM-LOC'), ('0', ',', ',', ',', '19', 'punct', 'False', ',/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', "''", "''", "''", '19', 'punct', 'False', "''/False", 'O', 'O', 'O', 'I-AM-LOC'), ('0', 'Leisure', 'leisure', 'NN', '19', 'dep', 'False', 'NN/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', '&', '&', 'CC', '27', 'cc', 'False', 'CC/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', 'Arts', 'arts', 'NNS', '27', 'conj', 'False', 'NNS/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', ')', ')', '-RRB-', '19', 'punct', 'False', '-RRB-/False', 'O', 'O', 'O', 'I-AM-LOC'), ('0', ',', ',', ',', '44', 'punct', 'False', ',/False', 'O', 'O', 'O', 'O'), ('0', 'the', 'the', 'DT', '33', 'det', 'False', 'DT/False', 'O', 'O', 'B-A1', 'B-A1'), ('0', 'role', 'role', 'NN', '44', 'nsubjpass', 'False', 'NN/False', 'O', 'O', 'I-A1', 'I-A1'), ('0', 'of', 'of', 'IN', '33', 'prep', 'False', 'IN/False', 'O', 'O', 'I-A1', 'I-A1'), ('0', 'Celimene', 'celimene', 'NNP', '34', 'pobj', 'False', 'NNP/False', 'O', 'O', 'I-A1', 'I-A1'), ('0', ',', ',', ',', '33', 'punct', 'False', ',/False', 'O', 'O', 'O', 'I-A1'), ('0', 'played', 'played', 'VBN', '33', 'vmod', 'True', 'VBN/True', 'O', 'O', 'B-V', 'I-A1'), ('0', 'by', 'by', 'IN', '37', 'prep', 'False', 'IN/False', 'O', 'O', 'B-A0', 'I-A1'), ('0', 'Kim', 'kim', 'NNP', '40', 'nn', 'False', 'NNP/False', 'O', 'O', 'I-A0', 'I-A1'), ('0', 'Cattrall', 'cattrall', 'NNP', '38', 'pobj', 'False', 'NNP/False', 'O', 'O', 'I-A0', 'I-A1'), ('0', ',', ',', ',', '33', 'punct', 'False', ',/False', 'O', 'O', 'O', 'I-A1'), ('0', 'was', 'was', 'VBD', '44', 'auxpass', 'False', 'VBD/False', 'O', 'O', 'O', 'O'), ('0', 'mistakenly', 'mistakenly', 'RB', '44', 'advmod', 'False', 'RB/False', 'O', 'O', 'O', 'B-AM-MNR'), ('0', 'attributed', 'attributed', 'VBN', '44', 'root', 'True', 'VBN/True', 'O', 'O', 'O', 'B-V'), ('0', 'to', 'to', 'TO', '44', 'prep', 'False', 'TO/False', 'O', 'O', 'O', 'B-A2'), ('0', 'Christina', 'christina', 'NNP', '47', 'nn', 'False', 'NNP/False', 'O', 'O', 'O', 'I-A2'), ('0', 'Haag', 'haag', 'NNP', '45', 'pobj', 'False', 'NNP/False', 'O', 'O', 'O', 'I-A2'), ('0', '.', '.', '.', '44', 'punct', 'False', './False', 'O', 'O', 'O', 'O')]
           '''
         else:
+          # pdb.set_trace()
           if buf:
             # buf.append(tuple(parsetrees[sents].lower().split()))
             # if sents<: pdb.set_trace()
-            if sents<128:yield buf#, parsetrees[sents].lower().split())
+            # if sents<297:
+            # if len(buf)<59:
+            yield buf#, parsetrees[sents].lower().split())
             lengths.append(len(buf))
             sents += 1
             buf = []
@@ -65,11 +70,12 @@ def conll_data_generator(filenames, parsefilenames, data_config):
       if buf:
         # pdb.set_trace()
         yield buf
-  #pdb.set_trace()
+    
   print('max sentence lengths: ', max(lengths),len(lengths))
 
+
 def serialized_tree_generator(parse_tree_filenames, data_config):
-  lengths = []
+  s_lengths = []
   print('serialized_tree_gen')
   for filename in parse_tree_filenames:
     with open(filename, 'r') as f:
@@ -80,11 +86,13 @@ def serialized_tree_generator(parse_tree_filenames, data_config):
         if line:
           toks += 1
           split_line = line.split()
-          if sents<128:yield split_line
-          lengths.append(len(split_line))
-          sents+=1
+          yield split_line
+          sents += 1
+          s_lengths.append(len(split_line))
   # pdb.set_trace()
-  print('max tree lengths: ', max(lengths),len(lengths))
+  print('max tree lengths: ', max(s_lengths),len(s_lengths))
+  # pdb.set_trace()
+
 
 
 def serialized_tree_generator2(parse_tree_filenames, data_config):
@@ -101,7 +109,6 @@ def serialized_tree_generator2(parse_tree_filenames, data_config):
           # yield split_line
           mat.append(split_line)
   return mat
-
 
 def conll_data_generator2(filenames, data_config):
   lengths = []

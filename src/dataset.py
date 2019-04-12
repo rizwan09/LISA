@@ -1,6 +1,6 @@
 import tensorflow as tf
 import constants
-from data_generator import conll_data_generator, serialized_tree_generator, conll_data_generator2, serialized_tree_generator2
+from data_generator import conll_data_generator, serialized_tree_generator
 from tensorflow.contrib.data.python.ops import grouping
 from tensorflow.python.ops import array_ops
 import pdb
@@ -50,14 +50,8 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
 
   with tf.device('/cpu:0'): 
   # with constants.MIRRORED_STRATEGY.scope():
-    parse_feature_names = [d for d in data_config.keys() if 'parse_tree_type' in d]
-
-    parseset = tf.data.Dataset.from_generator(lambda: serialized_tree_generator(parse_tree_filenames, data_config),output_shapes=[None], output_types=tf.string)
-                                             
-    # intmap the dataset
-    parseset = parseset.map(map_strings_to_ints(vocab_lookup_ops, data_config, parse_feature_names), num_parallel_calls=8)
     
-  # with tf.device('/gpu:2'):
+  
     # get the names of data fields in data_config that correspond to features or labels,
     # and thus that we want to load into batches
 
@@ -71,6 +65,14 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
     # intmap the dataset
     dataset = dataset.map(map_strings_to_ints(vocab_lookup_ops, data_config, feature_label_names), num_parallel_calls=8)
     # dataset = dataset.cache()
+    
+    # with tf.device('/gpu:2'):
+    parse_feature_names = [d for d in data_config.keys() if 'parse_tree_type' in d]
+
+    parseset = tf.data.Dataset.from_generator(lambda: serialized_tree_generator(parse_tree_filenames, data_config),output_shapes=[None], output_types=tf.string)
+                                             
+    # intmap the dataset
+    parseset = parseset.map(map_strings_to_ints(vocab_lookup_ops, data_config, parse_feature_names), num_parallel_calls=8)
     
     
     
@@ -126,7 +128,7 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
       # zippedDatatset = zippedDatatset.shard(input_context.num_input_pipelines,
       #                         input_context.input_pipeline_id)
 
-   
+    zippedDatatset = zippedDatatset.filter(lambda d, t: tf.math.less_equal(tf.shape(d)[0], 42)) #empirical for now
     zippedDatatset = zippedDatatset.apply(tf.contrib.data.bucket_by_sequence_length(element_length_func=lambda d, t: tf.shape(d)[0]+tf.shape(t)[0], \
                                                               bucket_boundaries=bucket_boundaries,
                                                               bucket_batch_sizes=bucket_batch_sizes,
@@ -148,3 +150,4 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
 
     return iterator.get_next()
     #return zippedDatatset
+

@@ -28,8 +28,8 @@ def layer_norm(inputs, epsilon=1e-6):
     beta = tf.get_variable("beta", params_shape, initializer=tf.zeros_initializer())
     gamma = tf.get_variable("gamma", params_shape, initializer=tf.ones_initializer())
     normalized = (inputs - mean) * tf.rsqrt(variance + epsilon)
-    outputs = gamma * normalized + beta
-  return outputs
+    normalized = gamma * normalized + beta
+  return normalized
 
 
 # def orthonormal_initializer(input_size, output_size):
