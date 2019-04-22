@@ -31,7 +31,6 @@
           "reverse_maps": {
             "reverse_maps": [
               "word",
-	      "parse_tree",
               "srl",
               "gold_pos"
             ]

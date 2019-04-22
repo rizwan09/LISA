@@ -142,7 +142,7 @@ estimator = tf.estimator.Estimator(model_fn=model.model_fn, model_dir=args.save_
 # todo: don't keep 5
 save_best_exporter = tf.estimator.BestExporter(compare_fn=partial(train_utils.best_model_compare_fn,
                                                                   key=task_config['best_eval_key']),
-                                               serving_input_receiver_fn=train_utils.serving_input_receiver_fn)
+                                               serving_input_receiver_fn=train_utils.serving_input_receiver_fn2)
 
 # Train forever until killed
 train_spec = tf.estimator.TrainSpec(input_fn=train_input_fn)

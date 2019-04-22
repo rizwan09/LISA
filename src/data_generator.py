@@ -6,6 +6,7 @@ import pdb
 def conll_data_generator(filenames, parsefilenames, data_config):
   print('in conll_data_generator')
   lengths = []
+  lower_lengths = []
   for (filename, parsefilename) in zip(filenames, parsefilenames):
     with open(filename, 'r') as f, open(parsefilename, 'r') as pf:
       sents = 0
@@ -63,6 +64,7 @@ def conll_data_generator(filenames, parsefilenames, data_config):
             # if len(buf)<59:
             yield buf#, parsetrees[sents].lower().split())
             lengths.append(len(buf))
+            if len(buf)<=42: lower_lengths.append(len(buf))
             sents += 1
             buf = []
           # print()
@@ -71,7 +73,7 @@ def conll_data_generator(filenames, parsefilenames, data_config):
         # pdb.set_trace()
         yield buf
     
-  print('max sentence lengths: ', max(lengths),len(lengths))
+  print('max sentence lengths: ', max(lengths),len(lengths), " less than = 42:", len(lower_lengths), len(lower_lengths)/len(lengths))
 
 
 def serialized_tree_generator(parse_tree_filenames, data_config):
@@ -159,4 +161,5 @@ def conll_data_generator2(filenames, data_config):
         yield buf#(parsetrees[sents].lower().split(), buf)
   #pdb.set_trace()
   print(max(lengths))
+
 

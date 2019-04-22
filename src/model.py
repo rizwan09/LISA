@@ -88,7 +88,10 @@ class LISAModel:
     return pretrained_embeddings
 
   #labels are basically parse_tree_type
-  def model_fn(self, features, labels, mode):
+  def model_fn(self, features, mode):
+    features_labels = features
+    features = features_labels['features']
+    labels = features_labels['parse_tree']
 
     # todo can estimators handle dropout for us or do we need to do it on our own?
     hparams = self.hparams(mode)

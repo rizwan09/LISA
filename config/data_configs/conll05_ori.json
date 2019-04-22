@@ -4,7 +4,7 @@
   },
   "sent_id": {
     "conll_idx": 1,
-    "label": false
+    "label": true
   },
   "word": {
     "conll_idx": 3,
@@ -34,14 +34,14 @@
 
   "parse_head": {
     "conll_idx": [6, 2],
-    "label": false,
+    "label": true,
     "converter":  {
       "name": "parse_roots_self_loop"
     }
   },
   "parse_label": {
     "conll_idx": 7,
-    "label": false,
+    "label": true,
     "vocab": "parse_label"
   },
   "domain": {
@@ -61,7 +61,7 @@
   },
   "joint_pos_predicate": {
     "conll_idx": [4, 9],
-    "label": false,
+    "label": true,
     "vocab": "joint_pos_predicate",
     "converter": {
       "name": "joint_converter",
@@ -82,19 +82,5 @@
     "converter": {
       "name": "idx_range_converter"
     }
-  },
-  "parse_tree": {
-    "feature": true,
-    "oov": false,
-    "updatable": true,
-    "vocab": "parse_tree"
-  },
- "parse_tree_type": {
-    "feature": true,
-    "vocab": "embeddings/glove.6B.100d.txt",
-    "converter":  {
-      "name": "lowercase"
-    },
-    "oov": false
   }
 }
