@@ -27,7 +27,7 @@ files = ['dev-set',  'train-set', 'test.wsj', 'test.brown']
 for file in files:
 	print(' FILE: ', file)
 	with open(file+'.gz.parse.sdeps', 'r') as f, \
-		open(file+'_parse_tree.txt', 'w') as wf: 
+		open(file+'.pred.serialized.txt', 'w') as wf: 
 		new_line = ''
 		lc  = 0
 		for line in f:
