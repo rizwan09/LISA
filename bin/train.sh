@@ -16,6 +16,8 @@ python3 src/train.py \
 --model_configs $model_configs \
 --task_configs $task_configs \
 --layer_configs $layer_configs \
+--train_parse_files $train_parse_files \
+--dev_parse_files $dev_parse_files \
+--test_parse_files $test_parse_files \
 --attention_configs "$attention_configs" \
 $params
-

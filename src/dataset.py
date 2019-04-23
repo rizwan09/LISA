@@ -127,7 +127,7 @@ def get_data_iterator(data_filenames, parse_tree_filenames, data_config, vocab_l
     #   tf.logging.log(tf.logging.INFO,'Sharding the dataset: input_pipeline_id=%d num_input_pipelines=%d' % (input_context.input_pipeline_id, input_context.num_input_pipelines))
       # zippedDatatset = zippedDatatset.shard(input_context.num_input_pipelines,
       #                         input_context.input_pipeline_id)
-    zippedDatatset = zippedDatatset.filter(lambda d, t: tf.math.less_equal(tf.shape(d)[0], 40)) #empirical for now
+    # zippedDatatset = zippedDatatset.filter(lambda d, t: tf.math.less_equal(tf.shape(d)[0], 40)) #empirical for now
     zippedDatatset = zippedDatatset.apply(tf.contrib.data.bucket_by_sequence_length(element_length_func=lambda d, t: tf.shape(d)[0]+tf.shape(t)[0], \
                                                               bucket_boundaries=bucket_boundaries,
                                                               bucket_batch_sizes=bucket_batch_sizes,

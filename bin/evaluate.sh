@@ -18,6 +18,8 @@ python3 src/evaluate.py \
 --model_configs $model_configs \
 --task_configs $task_configs \
 --layer_configs $layer_configs \
---attention_configs $attention_configs \
+--dev_parse_files $dev_parse_files \
+--test_parse_files $test_parse_files \
+--attention_configs "$attention_configs" \
 $params
 

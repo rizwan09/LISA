@@ -91,7 +91,7 @@ class LISAModel:
   def model_fn(self, features, mode):
     features_labels = features
     features = features_labels['features']
-    labels = features_labels['parse_tree']
+    parse_tree_features = features_labels['parse_tree']
 
     # todo can estimators handle dropout for us or do we need to do it on our own?
     hparams = self.hparams(mode)
@@ -102,7 +102,7 @@ class LISAModel:
       batch_size = batch_shape[0]
       batch_seq_len = batch_shape[1]
 
-      parse_batch_shape = tf.shape(labels)
+      parse_batch_shape = tf.shape(parse_tree_features)
       parse_batch_size = parse_batch_shape[0]
       parse_batch_seq_len = parse_batch_shape[1]
 
@@ -120,9 +120,8 @@ class LISAModel:
       tokens_to_keep = tf.where(tf.equal(words, constants.PAD_VALUE), tf.zeros([batch_size, batch_seq_len]),
                                 tf.ones([batch_size, batch_seq_len]))
       
-      parse_tree_feats={'parse_tree_type': labels}
-      parse_tree_type=parse_tree_feats['parse_tree_type']
-      parse_tree_tokens_to_keep = tf.where(tf.equal(parse_tree_type, constants.PAD_VALUE), tf.zeros([parse_batch_size, parse_batch_seq_len]),
+      parse_tree_feats={'parse_tree_type': parse_tree_features}
+      parse_tree_tokens_to_keep = tf.where(tf.equal(parse_tree_features, constants.PAD_VALUE), tf.zeros([parse_batch_size, parse_batch_seq_len]),
                                 tf.ones([parse_batch_size, parse_batch_seq_len]))
 
       # Extract named features from monolithic "features" input

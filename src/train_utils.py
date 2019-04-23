@@ -1,7 +1,7 @@
 import tensorflow as tf
 import json
 import re
-import sys
+import sys, pdb
 # import dataset_ori as dataset
 import dataset
 import constants
@@ -36,8 +36,16 @@ def get_input_fn(vocab, data_config, data_files, parse_tree_files, batch_size, n
   vocab_lookup_ops = vocab.create_vocab_lookup_ops(embedding_files)
   # print("In train_utils.get_input_fn")
   # #for my idea
-  tuple_data_itr = dataset.get_data_iterator(data_files, parse_tree_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
-                                   shuffle_buffer_multiplier)
+  # tuple_data_itr = dataset.get_data_iterator(data_files, parse_tree_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
+  #                                  shuffle_buffer_multiplier)
+  bsth = '/home/rizwan/SBCR/preprocess-conll05-master/conll05st-release/'
+  if 'train-set' in data_files[0]:
+    # pdb.set_trace()
+    tuple_data_itr = dataset.get_data_iterator(data_filenames = [bsth+'train-set.gz.parse.sdeps.combined.rnd_0.7.short.bio'], parse_tree_filenames = [bsth+'train-set.gz.parse.pred.serialized.rnd_0.7.short.txt'], data_config=data_config, vocab_lookup_ops=vocab_lookup_ops, batch_size=batch_size, num_epochs=num_epochs, shuffle=shuffle,
+                                   shuffle_buffer_multiplier=shuffle_buffer_multiplier)
+  else:
+    tuple_data_itr = dataset.get_data_iterator(data_filenames = [bsth+'dev-set.gz.parse.sdeps.combined.rnd_0.7.short.bio'], parse_tree_filenames = [bsth+'dev-set.gz.parse.pred.serialized.rnd_0.7.short.txt'], data_config=data_config, vocab_lookup_ops=vocab_lookup_ops, batch_size=batch_size, num_epochs=num_epochs, shuffle=shuffle,
+                                   shuffle_buffer_multiplier=shuffle_buffer_multiplier)
   return {'features': tuple_data_itr[0], 'parse_tree':tuple_data_itr[1]}
   # #for baseline
   # return dataset.get_data_iterator(data_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
@@ -159,8 +167,8 @@ def serving_input_receiver_fn():
 def serving_input_receiver_fn2():
     # placeholder for the data received by the API (already parsed, no JSON decoding necessary,
     # but the JSON must contain one or multiple 'image' key(s) with 28x28 greyscale images  as content.)
-    inputs = {"features": tf.placeholder(tf.int32, [None, None, None]), "labels": tf.placeholder(tf.int32, [None, None])}  # the shape of this dict should match the shape of your JSON
+    inputs = {"features": tf.placeholder(tf.int32, [None, None, None]), "parse_tree": tf.placeholder(tf.int32, [None, None])}  # the shape of this dict should match the shape of your JSON
     # features = {inputs['features'],  inputs['labels']} # no transformation needed
-    return tf.estimator.export.TensorServingInputReceiver(inputs, inputs)  # features are the features needed by your model_fn
+    return tf.estimator.export.ServingInputReceiver(inputs, inputs)  # features are the features needed by your model_fn
     # Return a ServingInputReceiver if your features are a dictionary of Tensors, TensorServingInputReceiver if they are a straight Tensor
 
