@@ -22,7 +22,10 @@ Follow the instructions all the way through [further preprocessing](https://gith
 3. Make sure the correct data paths are set in `config/conll05-srl-only.conf`
 4. Add one column by running the ``preprocess-conll05-master/conll05st-release/add_POS_column.py`` 
 5. Fix brown.gz.parse ``)(. ?)`` into ``(. ?))``
-6. Generate (in-order) serialized gold parse tree for each sentences in dev/train/wsj/brown set by running ``preprocess-conll05-master/conll05st-release/tree_reader.py`` [5-6] are in the sam efolder as the data is.
+6. Generate predicted constituency parse ``CUDA_VISIBLE_DEVICES=3 python parserAllennlp.py``
+7. For small train/eval file ``python short_eval_file_generator.py``
+8. Generate (in-order) serialized gold parse tree for each sentences in dev/train/wsj/brown set by running ``preprocess-conll05-master/conll05st-release/tree_reader.py`` [5-8] are in the same folder as the data is.
+
 
 
 Train a model:
