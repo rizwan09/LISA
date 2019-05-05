@@ -21,6 +21,18 @@ def traverse_tree(tree):
 
     return st.strip()
 
+def traverse_tree_no_leaf(tree):
+    st = ''
+    if len(tree)==1:
+    	st = tree.label()#str(tree).replace('(', '').replace(')','')
+    elif len(tree)>1: 
+    	st += traverse_tree_no_leaf(tree[0])
+    	st += ' ' +tree.label()+ ' '
+    	for subtree in tree[1:]:
+    		st += traverse_tree_no_leaf(subtree) + ' '
+
+    return st.strip()
+
 parser = benepar.Parser("benepar_en2")
 
 files = ['dev-set',  'train-set', 'test.wsj', 'test.brown']
@@ -37,6 +49,8 @@ for file in files:
 			else:
 				p = parser.parse(new_line)
 				wf.write(traverse_tree(p)+'\n')
+				# pdb.set_trace()
+				# wf.write(traverse_tree_no_leaf(p)+'\n')
 				new_line = ''
 				lc+=1
 				print(' line: ', lc)

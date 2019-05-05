@@ -36,16 +36,39 @@ def get_input_fn(vocab, data_config, data_files, parse_tree_files, batch_size, n
   vocab_lookup_ops = vocab.create_vocab_lookup_ops(embedding_files)
   # print("In train_utils.get_input_fn")
   # #for my idea
-  # tuple_data_itr = dataset.get_data_iterator(data_files, parse_tree_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
-  #                                  shuffle_buffer_multiplier)
-  bsth = '/home/rizwan/SBCR/preprocess-conll05-master/conll05st-release/'
+  tuple_data_itr = dataset.get_data_iterator(data_files, parse_tree_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
+                                   shuffle_buffer_multiplier)
+  '''bsth = '/home/rizwan/SBCR/preprocess-conll05-master/conll05st-release/'
+
+
+
+  # dpf = bsth+'dev-set.gz.parse.no.leaf.serialized.rnd_0.2.no.leaf.short.txt'
+  # tpf = bsth+'train-set.gz.parse.no.leaf.serialized.rnd_0.2.no.leaf.short.txt'
+
+  # dpf = bsth + 'dev-set.gz.parse.serialized.rnd_0.2.with.leaf.short.txt'
+  # tpf = bsth + 'train-set.gz.parse.serialized.rnd_0.2.with.leaf.short.txt'
+
+  # dpf = bsth + 'dev-set.pred.no.leaf.serialized.rnd_0.2.no.leaf.short.txt'
+  # tpf = bsth + 'train-set.pred.no.leaf.serialized.rnd_0.2.no.leaf.short.txt'
+  
+  # dpf = bsth + 'dev-set.gz.parse.pred.serialized.rnd_0.2.with.leaf.short.txt'
+  # tpf = bsth + 'train-set.gz.parse.pred.serialized.rnd_0.2.with.leaf.short.txt'
+
+
+ 
   if 'train-set' in data_files[0]:
     # pdb.set_trace()
-    tuple_data_itr = dataset.get_data_iterator(data_filenames = [bsth+'train-set.gz.parse.sdeps.combined.rnd_0.7.short.bio'], parse_tree_filenames = [bsth+'train-set.gz.parse.pred.serialized.rnd_0.7.short.txt'], data_config=data_config, vocab_lookup_ops=vocab_lookup_ops, batch_size=batch_size, num_epochs=num_epochs, shuffle=shuffle,
+    # tuple_data_itr = dataset.get_data_iterator(data_filenames = [bsth+'train-set.gz.parse.sdeps.combined.rnd_0.7.short.bio'], parse_tree_filenames = [bsth+'train-set.gz.parse.pred.serialized.rnd_0.7.short.txt'], data_config=data_config, vocab_lookup_ops=vocab_lookup_ops, batch_size=batch_size, num_epochs=num_epochs, shuffle=shuffle,
+    #                                shuffle_buffer_multiplier=shuffle_buffer_multiplier)
+
+    tuple_data_itr = dataset.get_data_iterator(data_filenames = [bsth+'train-set.gz.parse.sdeps.combined.rnd_0.2.short.bio'], parse_tree_filenames = [tpf], data_config=data_config, vocab_lookup_ops=vocab_lookup_ops, batch_size=batch_size, num_epochs=num_epochs, shuffle=shuffle,
                                    shuffle_buffer_multiplier=shuffle_buffer_multiplier)
   else:
-    tuple_data_itr = dataset.get_data_iterator(data_filenames = [bsth+'dev-set.gz.parse.sdeps.combined.rnd_0.7.short.bio'], parse_tree_filenames = [bsth+'dev-set.gz.parse.pred.serialized.rnd_0.7.short.txt'], data_config=data_config, vocab_lookup_ops=vocab_lookup_ops, batch_size=batch_size, num_epochs=num_epochs, shuffle=shuffle,
+    # tuple_data_itr = dataset.get_data_iterator(data_filenames = [bsth+'dev-set.gz.parse.sdeps.combined.rnd_0.7.short.bio'], parse_tree_filenames = [bsth+'dev-set.gz.parse.pred.serialized.rnd_0.7.short.txt'], data_config=data_config, vocab_lookup_ops=vocab_lookup_ops, batch_size=batch_size, num_epochs=num_epochs, shuffle=shuffle,
+    #                                shuffle_buffer_multiplier=shuffle_buffer_multiplier)
+    tuple_data_itr = dataset.get_data_iterator(data_filenames = [bsth+'dev-set.gz.parse.sdeps.combined.rnd_0.2.short.bio'], parse_tree_filenames = [dpf], data_config=data_config, vocab_lookup_ops=vocab_lookup_ops, batch_size=batch_size, num_epochs=num_epochs, shuffle=shuffle,
                                    shuffle_buffer_multiplier=shuffle_buffer_multiplier)
+  '''
   return {'features': tuple_data_itr[0], 'parse_tree':tuple_data_itr[1]}
   # #for baseline
   # return dataset.get_data_iterator(data_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
@@ -147,6 +170,11 @@ def best_model_compare_fn(best_eval_result, current_eval_result, key):
 
   if not current_eval_result or key not in current_eval_result:
     raise ValueError('best_eval_result cannot be empty or key "%s" is not found.' % key)
+
+  if best_eval_result[key] < current_eval_result[key]:
+    with open('best_result_pred_no_leaf_all_short.txt', 'w') as wf:
+      print(str(best_eval_result[key]) + '->'+ str(current_eval_result[key])+"\n")
+      wf.write(str(best_eval_result[key]) + '->'+ str(current_eval_result[key])+"\n")
 
   return best_eval_result[key] < current_eval_result[key]
 

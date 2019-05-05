@@ -39,12 +39,14 @@ class Vocab:
       for v in self.vocab_names_sizes.keys():
         if v in self.data_config:
           num_oov = 1 if 'oov' in self.data_config[v] and self.data_config[v]['oov'] else 0
+          if 'parse' in v: num_oov = 100
           this_lookup = tf.contrib.lookup.index_table_from_file("%s/%s.txt" % (self.save_dir, v),
                                                                 num_oov_buckets=num_oov,
                                                                 key_column_index=0)
           vocab_lookup_ops[v] = this_lookup
 
       if embedding_files:
+        # pdb.set_trace()
         for embedding_file in list(set(embedding_files)):
           embeddings_name = embedding_file
           vocab_lookup_ops[embeddings_name] = tf.contrib.lookup.index_table_from_file(embedding_file,
@@ -110,6 +112,7 @@ class Vocab:
                         if this_datum not in this_vocab_map:
                           this_vocab_map[this_datum] = 0
                         this_vocab_map[this_datum] += 1
+
                 else:
                   for d in vocabs_index.keys():
                     if 'parse_tree' not in d: 
@@ -124,6 +127,7 @@ class Vocab:
                         this_vocab_map[this_datum] += 1
                   sents +=1
 
+
   def create_load_or_update_vocab_files(self, data_config, save_dir, filenames=None, parsenames=None, update_only=False):
 
     # init maps
@@ -132,6 +136,7 @@ class Vocab:
     for d in data_config:
       updatable = 'updatable' in data_config[d] and data_config[d]['updatable']
       if 'vocab' in data_config[d] and data_config[d]['vocab'] == d and (updatable or not update_only):
+        print(d)
         this_vocab = {}
         if update_only and updatable and d in self.vocab_maps:
           this_vocab = self.vocab_maps[d]
@@ -147,6 +152,7 @@ class Vocab:
     if filenames:
       self.routine(filenames, vocabs, vocabs_index, data_config)
       self.routine(parsenames, vocabs, vocabs_index, data_config)
+      # pdb.set_trace()
     else:
       for d in vocabs_index.keys():
         this_vocab_map = vocabs[vocabs_index[d]]

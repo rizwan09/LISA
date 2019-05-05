@@ -156,8 +156,8 @@ class LISAModel:
           embedding_table = self.get_embedding_table(embedding_name, embedding_dim, include_oov,
                                                      pretrained_fname=input_pretrained_embeddings)
         else:
-          num_embeddings = self.vocab.vocab_names_sizes[embedding_name]
-          include_oov = self.vocab.oovs[embedding_name]
+          num_embeddings = embedding_dim #self.vocab.vocab_names_sizes[embedding_name]
+          include_oov = True #self.vocab.oovs[embedding_name]
           embedding_table = self.get_embedding_table(embedding_name, embedding_dim, include_oov,
                                                      num_embeddings=num_embeddings)
         embeddings[embedding_name] = embedding_table
@@ -343,7 +343,7 @@ class LISAModel:
 
         # export_outputs = {'predict_output': tf.estimator.export.PredictOutput({'scores': scores, 'preds': preds})}
 
-        logging_hook = tf.train.LoggingTensorHook(items_to_log, every_n_iter=20)
+        logging_hook = tf.train.LoggingTensorHook(items_to_log, every_n_iter=200)
 
         # need to flatten the dict of predictions to make Estimator happy
         flat_predictions = {"%s_%s" % (k1, k2): v2 for k1, v1 in predictions.items() for k2, v2 in v1.items()}

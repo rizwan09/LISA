@@ -31,14 +31,13 @@
    "head_dim": 25,
    "ff_hidden_size": 800
  },
- "embeddings": {
+"embeddings": {
    "word_type": {
      "embedding_dim": 100,
      "pretrained_embeddings": "embeddings/glove.6B.100d.txt"
    },
    "parse_tree_type": {
-     "embedding_dim": 100,
-     "pretrained_embeddings": "embeddings/glove.6B.100d.txt"
+     "embedding_dim": 100
    }
  },
  "inputs": [

@@ -91,10 +91,11 @@
   },
  "parse_tree_type": {
     "feature": true,
-    "vocab": "embeddings/glove.6B.100d.txt",
+    "vocab": "parse_tree",
     "converter":  {
       "name": "lowercase"
     },
-    "oov": false
+    "oov": false,
+    "updatable": true
   }
 }
