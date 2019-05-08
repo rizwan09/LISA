@@ -51,7 +51,7 @@ class Vocab:
       for v in self.vocab_names_sizes.keys():
         if v in self.data_config:
           num_oov = 1 if 'oov' in self.data_config[v] and self.data_config[v]['oov'] else 0
-          this_lookup = tf.contrib.lookup.index_table_from_file("%s/%s.txt" % (self.save_dir, v),
+          this_lookup = tf.contrib.lookup.index_table_from_file("%s/%s.txt" % (self.vocabs_dir, v),
                                                                 num_oov_buckets=num_oov,
                                                                 key_column_index=0)
           vocab_lookup_ops[v] = this_lookup

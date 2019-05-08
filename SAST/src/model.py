@@ -301,7 +301,7 @@ class LISAModel:
        
         # export_outputs = {'predict_output': tf.estimator.export.PredictOutput({'scores': scores, 'preds': preds})}
 
-        logging_hook = tf.train.LoggingTensorHook(items_to_log, every_n_iter=20)
+        logging_hook = tf.train.LoggingTensorHook(items_to_log, every_n_iter=200)
 
         # need to flatten the dict of predictions to make Estimator happy
         flat_predictions = {"%s_%s" % (k1, k2): v2 for k1, v1 in predictions.items() for k2, v2 in v1.items()}
