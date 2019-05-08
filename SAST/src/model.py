@@ -10,13 +10,13 @@ import nn_utils
 import train_utils
 import tf_utils
 import util
+import sys, pdb
 from lazy_adam_v2 import LazyAdamOptimizer
-
 
 class LISAModel:
 
   def __init__(self, hparams, model_config, task_config, attention_config, feature_idx_map, label_idx_map,
-               vocab):
+               vocab, average_gradients=8):
     self.train_hparams = hparams
     self.test_hparams = train_utils.copy_without_dropout(hparams)
 
@@ -26,6 +26,8 @@ class LISAModel:
     self.feature_idx_map = feature_idx_map
     self.label_idx_map = label_idx_map
     self.vocab = vocab
+    self._gradients = []
+    self._average_gradients = average_gradients
 
   def hparams(self, mode):
     if mode == ModeKeys.TRAIN:
@@ -127,8 +129,8 @@ class LISAModel:
           embedding_table = self.get_embedding_table(embedding_name, embedding_dim, include_oov,
                                                      pretrained_fname=input_pretrained_embeddings)
         else:
-          num_embeddings = self.vocab.vocab_names_sizes[embedding_name]
-          include_oov = self.vocab.oovs[embedding_name]
+          num_embeddings = embedding_dim
+          include_oov = True
           embedding_table = self.get_embedding_table(embedding_name, embedding_dim, include_oov,
                                                      num_embeddings=num_embeddings)
         embeddings[embedding_name] = embedding_table
@@ -293,8 +295,10 @@ class LISAModel:
                                       use_nesterov=hparams.use_nesterov)
         gradients, variables = zip(*optimizer.compute_gradients(loss))
         gradients, _ = tf.clip_by_global_norm(gradients, hparams.gradient_clip_norm)
-        train_op = optimizer.apply_gradients(zip(gradients, variables), global_step=tf.train.get_global_step())
 
+       
+        train_op = optimizer.apply_gradients(zip(gradients, variables), global_step=tf.train.get_global_step())
+       
         # export_outputs = {'predict_output': tf.estimator.export.PredictOutput({'scores': scores, 'preds': preds})}
 
         logging_hook = tf.train.LoggingTensorHook(items_to_log, every_n_iter=20)

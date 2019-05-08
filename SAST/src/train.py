@@ -8,6 +8,7 @@ from model import LISAModel
 import numpy as np
 import sys
 import util
+import constants
 
 arg_parser = argparse.ArgumentParser(description='')
 arg_parser.add_argument('--train_files', required=True,

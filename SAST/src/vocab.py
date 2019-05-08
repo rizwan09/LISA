@@ -202,7 +202,7 @@ class Vocab:
 
     for d in vocabs_index.keys():
       this_vocab_map = vocabs[vocabs_index[d]]
-      with open("%s/%s.txt" % (save_dir, d), 'w') as f:
+      with open("%s/%s.txt" % (self.vocabs_dir, d), 'w') as f:
         for k, v in this_vocab_map.items():
           print("%s\t%d" % (k, v), file=f)
 

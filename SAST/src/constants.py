@@ -1,4 +1,5 @@
 import time
+import tensorflow as tf
 
 PAD_VALUE = -1
 JOINT_LABEL_SEP = '/'
@@ -9,6 +10,10 @@ DEFAULT_BUCKET_BOUNDARIES = [20, 30, 50, 80]
 
 VERY_LARGE = 1e9
 VERY_SMALL = -1e9
+
+num_gpus = 2
+
+MIRRORED_STRATEGY = tf.contrib.distribute.MirroredStrategy(num_gpus=num_gpus) if num_gpus > 1 else None
 
 # Optimizer hyperparameters
 hparams = {
@@ -21,7 +26,7 @@ hparams = {
   'epsilon': 1e-12,
   'use_nesterov': True,
   'batch_size': 256,
-  'shuffle_buffer_multiplier': 5,
+  'shuffle_buffer_multiplier': 100,
   'eval_throttle_secs': 1000,
   'eval_every_steps': 1000,
   'num_train_epochs': 10000,
