@@ -61,16 +61,13 @@ class LISAModel:
 
       return embedding_table
 
-  def model_fn(self, features, mode):
-
+  # def model_fn(self, features, mode):
+  def model_minibatch(self, features, parse_tree_features, mode):
     # todo can estimators handle dropout for us or do we need to do it on our own?
     hparams = self.hparams(mode)
 
-    with tf.variable_scope("LISA", reuse=tf.AUTO_REUSE):
-      features_labels = features
-      features = features_labels['features']
-      parse_tree_features = features_labels['parse_tree']
-
+    with tf.variable_scope("LISA_mini_batch", reuse=tf.AUTO_REUSE):
+    
       batch_shape = tf.shape(features)
       batch_size = batch_shape[0]
       batch_seq_len = batch_shape[1]
@@ -263,6 +260,27 @@ class LISAModel:
 
                 # add this loss to the overall loss being minimized
                 loss += this_task_loss
+
+    return predictions, loss, eval_metric_ops
+
+  def model_fn(self, features, mode):
+    hparams = self.hparams(mode)
+    predictions = {}
+    eval_metric_ops = {}
+    export_outputs = {}
+    loss = tf.constant(0.)
+    items_to_log = {}
+
+    with tf.variable_scope("LISA", reuse=tf.AUTO_REUSE):
+      features_labels = features
+      features = features_labels['features']
+      parse_tree_features = features_labels['parse_tree']
+
+      predictions, loss, eval_metric_ops = self.model_minibatch(features, parse_tree_features, mode)
+
+      # for task, task_map in self.task_config[i].items():
+
+
 
       # set up moving average variables
       assign_moving_averages_dep = tf.no_op()
