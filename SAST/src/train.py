@@ -88,15 +88,20 @@ vocab.update(dev_filenames, dev_parse_files)
 embedding_files = list(set([embeddings_map['pretrained_embeddings'] for embeddings_map in model_config['embeddings'].values()
                    if 'pretrained_embeddings' in embeddings_map]))
 
+
+# Distributed training
+distribution = tf.contrib.distribute.MirroredStrategy(num_gpus=args.num_gpus) if args.num_gpus > 1 else None
+
+
 def train_input_fn():
   return train_utils.get_input_fn(vocab, data_config, train_filenames, train_parse_files, hparams.batch_size,
                                   num_epochs=hparams.num_train_epochs, shuffle=True, embedding_files=embedding_files,
-                                  shuffle_buffer_multiplier=hparams.shuffle_buffer_multiplier)
+                                  shuffle_buffer_multiplier=hparams.shuffle_buffer_multiplier, distribution=distribution)
 
 
 def dev_input_fn():
   return train_utils.get_input_fn(vocab, data_config, dev_filenames, dev_parse_files, hparams.batch_size, num_epochs=1, shuffle=False,
-                                  embedding_files=embedding_files)
+                                  embedding_files=embedding_files, distribution=distribution)
 
 
 # Generate mappings from feature/label names to indices in the model_fn inputs
@@ -109,8 +114,6 @@ model = LISAModel(hparams, model_config, layer_task_config, layer_attention_conf
 if args.debug:
   tf.logging.log(tf.logging.INFO, "Created trainable variables: %s" % str([v.name for v in tf.trainable_variables()]))
 
-# Distributed training
-distribution = tf.contrib.distribute.MirroredStrategy(num_gpus=args.num_gpus) if args.num_gpus > 1 else None
 
 # Set up the Estimator
 checkpointing_config = tf.estimator.RunConfig(save_checkpoints_steps=hparams.eval_every_steps, keep_checkpoint_max=1,

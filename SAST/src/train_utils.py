@@ -31,12 +31,13 @@ def load_hparams(args, model_config):
 
 
 def get_input_fn(vocab, data_config, data_files, parse_tree_files, batch_size, num_epochs, shuffle,
-                 shuffle_buffer_multiplier=1, embedding_files=None, input_context=None):
+                 shuffle_buffer_multiplier=1, embedding_files=None, input_context=None, distribution=None):
   # this needs to be created from here (lazily) so that it ends up in the same tf.Graph as everything else
   vocab_lookup_ops = vocab.create_vocab_lookup_ops(embedding_files)
   tuple_data_itr = dataset.get_data_iterator(data_files, parse_tree_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
                                    shuffle_buffer_multiplier)
-  return {'features': tuple_data_itr[0], 'parse_tree':tuple_data_itr[1]}
+  if distribution: return distribution.make_dataset_iterator(tuple_data_itr)
+  else: return {'features': tuple_data_itr[0], 'parse_tree':tuple_data_itr[1]}
                      
 
 
