@@ -132,7 +132,7 @@ def best_model_compare_fn(best_eval_result, current_eval_result, key):
     Raises:
       ValueError: If input eval result is None or no loss is available.
     """
-  file = 'best_f1_memory_debug'
+  file = 'best_f1_no_add_actually_no_conv_1dp'
   if not best_eval_result or key not in best_eval_result:
     raise ValueError('best_eval_result cannot be empty or key "%s" is not found.' % key)
 

@@ -65,7 +65,18 @@ class LISAModel:
 
       return embedding_table
 
-  
+  def get_avg_grad(self):
+    print(' updating ')
+    self._avg_gradients = self._gradients[0]
+    for gradients_minibatch in self._gradients[1:]:
+      for gd_itm, gd_itm_mnbatch in zip(self._avg_gradients, gradients_minibatch):
+        gd_itm = tf.add(gd_itm_mnbatch, gd_itm)
+    #avg the gardients
+    for gd_itm in self._avg_gradients: gd_itm = tf.divide(gd_itm, tf.cast(tf.constant(self.nbatches), dtype=tf.float32))
+    self._gradients = []
+    return self._avg_gradients
+
+
   def model_fn(self, features, mode):
     
     # todo can estimators handle dropout for us or do we need to do it on our own?
@@ -302,26 +313,10 @@ class LISAModel:
         gradients, variables = zip(*optimizer.compute_gradients(loss))
         gradients, _ = tf.clip_by_global_norm(gradients, hparams.gradient_clip_norm)
 
-        # self._gradients.append(gradients)
-        # self._avg_gradients = self._gradients[0]
-
-        # if len(self._gradients) == self.nbatches:
-        #   for gradients_minibatch in self._gradients[1:]:
-        #     for gd_itm, gd_itm_mnbatch in zip(self._avg_gradients, gradients_minibatch):
-        #       gd_itm = tf.add(gd_itm_mnbatch, gd_itm)
-        #   #avg the gardients
-        #   for gd_itm in self._avg_gradients: gd_itm = tf.divide(gd_itm, tf.cast(tf.constant(self.nbatches), dtype=tf.float32))
-        #   self._gradients = []
-        # else: 
-        #   for gd_itm in self._avg_gradients:
-        #     gd_itm = tf.zeros_like(gd_itm)
-
-        train_op = optimizer.apply_gradients(zip(gradients, variables), global_step=tf.train.get_global_step())
-
         
-
-        # export_outputs = {'predict_output': tf.estimator.export.PredictOutput({'scores': scores, 'preds': preds})}
-
+        train_op = optimizer.apply_gradients(zip(gradients, variables), global_step=tf.train.get_global_step())
+                                 
+        
         logging_hook = tf.train.LoggingTensorHook(items_to_log, every_n_iter=200)
 
         # need to flatten the dict of predictions to make Estimator happy
