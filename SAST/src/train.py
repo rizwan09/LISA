@@ -82,8 +82,10 @@ dev_filenames = args.dev_files.split(',')
 dev_parse_files=args.dev_parse_files.split(',')
 train_parse_files=args.train_parse_files.split(',')
 
-vocab = Vocab(data_config, args.save_dir, train_filenames, train_parse_files)
-vocab.update(dev_filenames, dev_parse_files)
+# vocab = Vocab(data_config, args.save_dir, train_filenames, train_parse_files)
+vocab = Vocab(data_config, args.save_dir, train_filenames)
+# vocab.update(dev_filenames, dev_parse_files)
+vocab.update(dev_filenames)
 
 embedding_files = list(set([embeddings_map['pretrained_embeddings'] for embeddings_map in model_config['embeddings'].values()
                    if 'pretrained_embeddings' in embeddings_map]))

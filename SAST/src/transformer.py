@@ -308,16 +308,16 @@ def syntax_aware_semantic(inputs, parse_tree_inputs, seq_lengths, parse_tree_seq
       x, attn_weights = dot_product_attention(q, parse_tree_k, parse_tree_v, parse_tree_bias, special_attention, attn_dropout)
       x = combine_heads(x)
 
-      # params = tf.get_variable("final_proj", [1, 1, total_output_size, total_output_size])
-      # x = tf.expand_dims(x, 1)
-      # x = tf.nn.conv2d(x, params, [1, 1, 1, 1], "SAME")
-      # x = tf.squeeze(x, 1)
+      params = tf.get_variable("final_proj", [1, 1, total_output_size, total_output_size])
+      x = tf.expand_dims(x, 1)
+      x = tf.nn.conv2d(x, params, [1, 1, 1, 1], "SAME")
+      x = tf.squeeze(x, 1)
       
       xcat = x #tf.concat([antecedent,x], -1)
 
 
       xcat = tf.add(xcat, tf.nn.dropout(xcat, prepost_dropout))
-      # xcat = tf.add(antecedent, tf.nn.dropout(xcat, prepost_dropout))
+      # xcat = tf.add(antecedent, tf.nn.dropout(xcat, prepost_dropout)) #
 
       with tf.variable_scope("contextualized_ffnn"):
         xcat = nn_utils.layer_norm(xcat)

@@ -37,7 +37,7 @@ def get_input_fn(vocab, data_config, data_files, parse_tree_files, batch_size, n
   tuple_data_itr = dataset.get_data_iterator(data_files, parse_tree_files, data_config, vocab_lookup_ops, batch_size, num_epochs, shuffle,
                                    shuffle_buffer_multiplier)
   if distribution: return distribution.make_dataset_iterator(tuple_data_itr)
-  else: return {'features': tuple_data_itr[0], 'parse_tree':tuple_data_itr[1]}
+  else: return {'features': tuple_data_itr[0], 'parse_tree':tuple_data_itr[1], 'syntax_rep':tuple_data_itr[2]}
                      
 
 
@@ -132,7 +132,7 @@ def best_model_compare_fn(best_eval_result, current_eval_result, key):
     Raises:
       ValueError: If input eval result is None or no loss is available.
     """
-  file = 'best_f1_no_add_actually_no_conv_1dp'
+  file = 'best_f1_two_conv_no_antacent_bert_debug'
   if not best_eval_result or key not in best_eval_result:
     raise ValueError('best_eval_result cannot be empty or key "%s" is not found.' % key)
 
@@ -147,9 +147,10 @@ def best_model_compare_fn(best_eval_result, current_eval_result, key):
   return best_eval_result[key] < current_eval_result[key]
 
   
-def serving_input_receiver_fn():
+def serving_input_receiver_fn(syntax_dim=128):
   inputs = {"features": tf.placeholder(tf.int32, [None, None, None]), \
-    "parse_tree": tf.placeholder(tf.int32, [None, None])}  
+    "parse_tree": tf.placeholder(tf.int32, [None, None]),\
+    "syntax_rep": tf.placeholder(tf.float32, [None, None, syntax_dim])}  
   return tf.estimator.export.ServingInputReceiver(inputs, inputs)  
 
     

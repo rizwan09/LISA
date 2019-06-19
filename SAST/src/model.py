@@ -86,6 +86,8 @@ class LISAModel:
       features_labels = features
       features = features_labels['features']
       parse_tree_features = features_labels['parse_tree']
+      # pdb.set_trace()
+      syntax_rep = features_labels['syntax_rep']
 
       batch_shape = tf.shape(features)
       batch_size = batch_shape[0]
@@ -131,7 +133,7 @@ class LISAModel:
         else:
           these_labels_masked = tf.squeeze(these_labels_masked, -1)
         labels[l] = these_labels_masked
-
+      # pdb.set_trace()
       # load transition parameters
       transition_stats = util.load_transition_params(self.task_config, self.vocab)
 
@@ -163,19 +165,23 @@ class LISAModel:
       current_input = tf.nn.dropout(current_input, hparams.input_dropout)
 
       #parse_tree_type_input
-      parse_tree_inputs_list = []
-      for input_name in self.model_config['parse_tree_inputs']:
-        input_values = parse_tree_feats[input_name]
-        input_embedding_lookup = tf.nn.embedding_lookup(embeddings[input_name], input_values)
-        parse_tree_inputs_list.append(input_embedding_lookup)
-        tf.logging.log(tf.logging.INFO, "Added %s to parse_tree_inputs list." % input_name)
-      if len(parse_tree_inputs_list)>1: current_parse_tree_input = tf.concat(parse_tree_inputs_list, axis=2)
-      else: current_parse_tree_input = parse_tree_inputs_list[0]
-      current_parse_tree_input = tf.nn.dropout(current_parse_tree_input, hparams.input_dropout)
+      # parse_tree_inputs_list = []
+      # for input_name in self.model_config['parse_tree_inputs']:
+      #   input_values = parse_tree_feats[input_name]
+      #   input_embedding_lookup = tf.nn.embedding_lookup(embeddings[input_name], input_values)
+      #   parse_tree_inputs_list.append(input_embedding_lookup)
+      #   tf.logging.log(tf.logging.INFO, "Added %s to parse_tree_inputs list." % input_name)
+      # if len(parse_tree_inputs_list)>1: current_parse_tree_input = tf.concat(parse_tree_inputs_list, axis=2)
+      # else: current_parse_tree_input = parse_tree_inputs_list[0]
+      # current_parse_tree_input = tf.nn.dropout(current_parse_tree_input, hparams.input_dropout)
+      
+      current_parse_tree_input = tf.nn.dropout(syntax_rep, hparams.input_dropout)
 
 
       with tf.variable_scope('project_input'):
         current_input = nn_utils.MLP(current_input, sa_hidden_size, n_splits=1)
+        # pdb.set_trace()
+      with tf.variable_scope('project_syntax_input'):
         current_parse_tree_input = nn_utils.MLP(current_parse_tree_input, sa_hidden_size, n_splits=1) #PARSE_BATCH X SEQ X 200
 
 

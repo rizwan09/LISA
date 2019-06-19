@@ -1,6 +1,9 @@
 import data_converters
 import numpy as np
 import pdb
+import json
+import codecs
+import tensorflow as tf
 
 
 def conll_data_generator(filenames, data_config):
@@ -45,6 +48,56 @@ def conll_data_generator(filenames, data_config):
   print('max sentence lengths: ', max(lengths),len(lengths))#, " less than = 42:", len(lower_lengths), len(lower_lengths)/len(lengths))
 
 
+
+
+def get_syntax_rep(filenames,  trim=True):
+  print(' in get_syntax_rep func')
+  for file in filenames:
+    with tf.gfile.GFile(file, "r") as reader:
+      # sents = 0
+      while True:
+        line = reader.readline().strip() 
+        if line == '': break
+        '''data = ['linex_index', 'features']'''
+        '''0<=i<= sen_len or num_tokens = len(data['features']) #[CLS], [SEP] are included'''
+        '''data['features'][i]['layers'][j][index] = one of [-1, -2, -3, -4] #0<=j<=3(#layers)'''
+        '''data['features'][i]['layers'][j][values] = [768 or 25 or 100dim]'''
+        data = json.loads(line)
+        sen_rep = []
+        sln = len(data['features'])
+        for i in range(sln):
+          rep = []
+          nlayers = len(data['features'][i]['layers'])
+          for j in range(nlayers):
+            if trim: rep += data['features'][i]['layers'][j]['values']
+            else: rep += data['features'][i]['layers'][j]['values']
+          sen_rep.append(rep)
+        yield sen_rep
+        # sents+=1
+        # if sents==10: break
+
+      
+def get_syntax_sen(filenames):
+  print(' in get_syntax_sen func')
+  for file in filenames:
+    with tf.gfile.GFile(file, "r") as reader:
+      while True:
+        line = reader.readline().strip() 
+        if line == '': break
+        '''data = ['linex_index', 'features']'''
+        '''0<=i<= sen_len or num_tokens = len(data['features']) #[CLS], [SEP] are included'''
+        '''data['features'][i]['layers'][j][index] = one of [-1, -2, -3, -4] #0<=j<=3(#layers)'''
+        '''data['features'][i]['layers'][j][values] = [768 or 25 or 100dim]'''
+        # pdb.set_trace()
+        data = json.loads(line)
+        sln = len(data['features'])
+        yield [data['features'][i]['token'] for i in range(sln)]
+        # sents+=1
+        # if sents==10: break
+
+
+
+
 def serialized_tree_generator(parse_tree_filenames, data_config):
   s_lengths = []
   print('serialized_tree_gen', parse_tree_filenames)
@@ -60,5 +113,9 @@ def serialized_tree_generator(parse_tree_filenames, data_config):
           yield split_line
           sents += 1
           s_lengths.append(len(split_line))
+          # if sents==10: break
   print('max tree lengths: ', max(s_lengths),len(s_lengths))
+
+
+
 

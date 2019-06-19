@@ -51,6 +51,8 @@ class Vocab:
       for v in self.vocab_names_sizes.keys():
         if v in self.data_config:
           num_oov = 1 if 'oov' in self.data_config[v] and self.data_config[v]['oov'] else 0
+          # import pdb
+          # pdb.set_trace()
           this_lookup = tf.contrib.lookup.index_table_from_file("%s/%s.txt" % (self.vocabs_dir, v),
                                                                 num_oov_buckets=num_oov,
                                                                 key_column_index=0)
@@ -211,7 +213,7 @@ class Vocab:
   def make_vocab_files(self, data_config, save_dir, filenames=None, parsenames=None):
     return self.create_load_or_update_vocab_files(data_config, save_dir, filenames, parsenames, False)
 
-  def update(self, filenames, parsenames):
+  def update(self, filenames, parsenames=None):
     vocab_names_sizes = self.create_load_or_update_vocab_files(self.data_config, self.save_dir, filenames, parsenames,  True)
 
     # merge new and old

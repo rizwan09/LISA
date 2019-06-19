@@ -2,6 +2,7 @@ import time
 import tensorflow as tf
 
 PAD_VALUE = -1
+FLOAT_PAD_VALUE = 0.0
 JOINT_LABEL_SEP = '/'
 
 OOV_STRING = "<OOV>"
